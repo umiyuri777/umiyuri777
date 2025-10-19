@@ -119,105 +119,6 @@ class SpotifyActivityUpdater:
             self.logger.error(f"楽曲ランキングの取得中にエラーが発生しました: {e}")
             return []
     
-    def format_spotify_logs(self, logs: List[Dict[str, Any]]) -> str:
-        """
-        SpotifyログをMarkdown形式に整形
-        
-        Args:
-            logs: Spotifyログのリスト
-            
-        Returns:
-            整形されたMarkdown文字列
-        """
-        if not logs:
-            self.logger.info("ログが空のため、デフォルトメッセージを返します")
-            return "🎵 最近の音楽活動はありません"
-        
-        self.logger.info(f"{len(logs)}件のログをMarkdown形式に整形開始")
-        
-        markdown_lines = ["## 🎵 Recent Music Activity"]
-        markdown_lines.append("")
-        
-        # 日付ごとにグループ化
-        daily_logs = {}
-        for log in logs:
-            date_str = log.get('played_at', '').split('T')[0] if log.get('played_at') else 'Unknown'
-            if date_str not in daily_logs:
-                daily_logs[date_str] = []
-            daily_logs[date_str].append(log)
-        
-        # 日付順にソート（新しい順）
-        for date_str in sorted(daily_logs.keys(), reverse=True):
-            logs_for_date = daily_logs[date_str]
-            
-            # 日付ヘッダー
-            formatted_date = self._format_date(date_str)
-            markdown_lines.append(f"### {formatted_date}")
-            markdown_lines.append("")
-            
-            # その日の楽曲リスト
-            for log in logs_for_date:
-                track_name = log.get('track_name', 'Unknown Track')
-                artist_name = log.get('artist_name', 'Unknown Artist')
-                album_name = log.get('album_name', '')
-                played_at = log.get('played_at', '')
-                duration_ms = log.get('duration_ms', 0)
-                popularity = log.get('popularity', 0)
-                external_urls = log.get('external_urls', {})
-                
-                # 再生時刻を整形
-                time_str = ""
-                if played_at:
-                    try:
-                        played_time = datetime.fromisoformat(played_at.replace('Z', '+00:00'))
-                        time_str = f" ({played_time.strftime('%H:%M')})"
-                    except:
-                        pass
-                
-                # 楽曲の長さを分:秒形式に変換
-                duration_str = ""
-                if duration_ms:
-                    minutes = duration_ms // 60000
-                    seconds = (duration_ms % 60000) // 1000
-                    duration_str = f" [{minutes}:{seconds:02d}]"
-                
-                # 人気度を表示
-                popularity_str = ""
-                if popularity and popularity > 0:
-                    popularity_str = f" ⭐{popularity}"
-                
-                # Spotifyリンクを追加（もしあれば）
-                spotify_link = ""
-                external_urls_parsed = self._parse_external_urls(external_urls)
-                if external_urls_parsed and isinstance(external_urls_parsed, dict) and 'spotify' in external_urls_parsed:
-                    spotify_link = f" [🎵]({external_urls_parsed['spotify']})"
-                
-                # アルバム名を表示（もしあれば）
-                album_str = f" - *{album_name}*" if album_name else ""
-                
-                markdown_lines.append(
-                    f"- 🎶 **{track_name}** - {artist_name}{album_str}{time_str}{duration_str}{popularity_str}{spotify_link}"
-                )
-            
-            markdown_lines.append("")
-        
-        # 統計情報を追加
-        stats = self._calculate_stats(logs)
-        if stats:
-            markdown_lines.append("### 📊 統計情報")
-            markdown_lines.append("")
-            markdown_lines.append(f"- **総再生回数**: {stats['total_plays']}回")
-            markdown_lines.append(f"- **ユニーク楽曲数**: {stats['unique_tracks']}曲")
-            markdown_lines.append(f"- **ユニークアーティスト数**: {stats['unique_artists']}人")
-            markdown_lines.append(f"- **総再生時間**: {stats['total_duration']}")
-            if stats['avg_popularity'] > 0:
-                markdown_lines.append(f"- **平均人気度**: {stats['avg_popularity']:.1f}")
-            markdown_lines.append("")
-        
-        result = "\n".join(markdown_lines)
-        self.logger.info(f"Markdown形式の整形が完了しました (文字数: {len(result)})")
-        return result
-    
     def format_track_ranking(self, ranking: List[Dict[str, Any]]) -> str:
         """
         楽曲ランキングをMarkdown形式に整形
@@ -475,9 +376,6 @@ class SpotifyActivityUpdater:
             self.logger.info("楽曲ランキングの取得を開始...")
             ranking = self.get_track_ranking()
             self.logger.info(f"{len(ranking)}曲のランキングを取得しました")
-            
-            # self.logger.info("ログの整形を開始...")
-            # formatted_content = self.format_spotify_logs(logs)
             
             self.logger.info("ランキングの整形を開始...")
             ranking_content = self.format_track_ranking(ranking)
