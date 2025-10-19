@@ -98,9 +98,7 @@ class SpotifyActivityUpdater:
             empty_html = [
                 "## 🏆 Top Tracks (過去1週間)",
                 "",
-                '<div style="padding: 14px; border: 1px dashed #30363d; border-radius: 12px; color: #8b949e; background: #0d1117;">',
-                'データがありません。Spotifyで音楽を再生するとここにランキングが表示されます。',
-                '</div>'
+                "データがありません。Spotifyで音楽を再生するとここにランキングが表示されます。",
             ]
             return "\n".join(empty_html)
         
@@ -108,10 +106,12 @@ class SpotifyActivityUpdater:
         
         markdown_lines = ["## 🏆 Top Tracks (過去1週間)"]
         markdown_lines.append("")
-        markdown_lines.append('<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: stretch;">')
+        markdown_lines.append('<table>')
 
-        # ランキング表示（カード型）
+        # ランキング表示（テーブル3列）
         for i, track in enumerate(ranking, 1):
+            if (i - 1) % 3 == 0:
+                markdown_lines.append('<tr>')
             track_name_raw = track.get('track_name', 'Unknown Track')
             artist_name_raw = track.get('artist_name', 'Unknown Artist')
             album_name_raw = track.get('album_name', '')
@@ -144,43 +144,42 @@ class SpotifyActivityUpdater:
             # ランキング表示
             rank_emoji = self._get_rank_emoji(i)
 
-            # バッジ（再生回数）
-            badges_html = [
-                f'<span style="background:#21262d; color:#c9d1d9; border:1px solid #30363d; border-radius:999px; padding:2px 8px; font-size:12px;">🔥{play_count}</span>'
-            ]
+            # 画像要素（幅のみ指定）
+            image_src = album_art_url or 'https://placehold.co/300x300?text=No+Art'
 
-            # 画像要素
-            image_src = album_art_url or 'https://placehold.co/600x600/0d1117/8b949e?text=No+Art'
-
-            # カードHTML
-            card_html_parts = []
-            card_html_parts.append('<div style="position: relative; background: #0d1117; border: 1px solid #30363d; border-radius: 12px; padding: 12px;">')
-            card_html_parts.append('<div style="display:flex; align-items:center; margin-bottom:8px;">')
-            card_html_parts.append(f'<span style="background:#1f6feb; color:#ffffff; font-weight:700; font-size:12px; padding:2px 8px; border-radius:999px;">{rank_emoji} {i}</span>')
-            card_html_parts.append('</div>')
-            link_start = f'<a href="{spotify_url}" style="text-decoration:none; color: inherit;">' if spotify_url else '<div>'
-            link_end = '</a>' if spotify_url else '</div>'
-            card_html_parts.append(link_start)
-            # 画像の縦横比を固定（正方形）。中身は object-fit: cover でクロップ
-            card_html_parts.append('<div style="position: relative; width: 100%; padding-top: 100%; overflow: hidden; border-radius: 8px; background: #161b22;">')
-            card_html_parts.append(f'<img src="{image_src}" alt="{album_name}" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; display:block;" />')
-            card_html_parts.append('</div>')
-            card_html_parts.append(link_end)
-            card_html_parts.append('<div style="margin-top:10px;">')
-            card_html_parts.append(f'<div style="font-weight:700; font-size:14px; line-height:1.35; color:#c9d1d9;">{track_name}</div>')
-            card_html_parts.append(f'<div style="color:#8b949e; font-size:12px; margin-top:2px;">{artist_name}</div>')
-            card_html_parts.append('<div style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">' + "".join(badges_html) + '</div>')
+            cell_parts = []
+            cell_parts.append('<td valign="top">')
+            cell_parts.append(f'<div><b>{rank_emoji} {i}</b></div>')
             if spotify_url:
-                card_html_parts.append(f'<a href="{spotify_url}" style="display:inline-block; margin-top:10px; background:#238636; color:#ffffff; border-radius:8px; padding:6px 10px; font-weight:600; font-size:12px; text-decoration:none;">Listen on Spotify</a>')
-            card_html_parts.append('</div>')  # inner content
-            card_html_parts.append('</div>')  # card
+                cell_parts.append(f'<a href="{spotify_url}"><img src="{image_src}" alt="{album_name}" width="220" /></a>')
+            else:
+                cell_parts.append(f'<img src="{image_src}" alt="{album_name}" width="220" />')
+            cell_parts.append('<br/>')
+            if spotify_url:
+                cell_parts.append(f'<div><a href="{spotify_url}">{track_name}</a></div>')
+            else:
+                cell_parts.append(f'<div>{track_name}</div>')
+            cell_parts.append(f'<div>{artist_name}</div>')
+            cell_parts.append(f'<div>🔥{play_count}</div>')
+            if spotify_url:
+                cell_parts.append(f'<div><a href="{spotify_url}"><img src="https://www.scdn.co/i/_global/favicon.png" alt="Spotify" width="20" /></a></div>')
+            cell_parts.append('</td>')
 
-            markdown_lines.append("".join(card_html_parts))
+            markdown_lines.append("".join(cell_parts))
 
-        markdown_lines.append('</div>')
+            if i % 3 == 0:
+                markdown_lines.append('</tr>')
+
+        # 3の倍数で終わらない場合、空セルで埋めて行を閉じる
+        if len(ranking) % 3 != 0:
+            for _ in range(3 - (len(ranking) % 3)):
+                markdown_lines.append('<td></td>')
+            markdown_lines.append('</tr>')
+
+        markdown_lines.append('</table>')
 
         result = "\n".join(markdown_lines)
-        self.logger.info(f"ランキングHTMLの整形が完了しました (文字数: {len(result)})")
+        self.logger.info(f"ランキング(テーブル版)の整形が完了しました (文字数: {len(result)})")
         return result
     
     def _get_album_art_via_oembed(self, spotify_url: str) -> str:
