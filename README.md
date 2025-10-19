@@ -33,7 +33,7 @@
 
 ### 🥇 1位
 **4回** | [この街で生きている](https://open.spotify.com/track/6sNWW9qJ6L9ZbVEpGNs8lG) - amazarashi ⭐26
-<a href="https://open.spotify.com/track/6sNWW9qJ6L9ZbVEpGNs8lG"><img src="https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e028743be7ce279a82b51013f5a" width="150" height="150" alt="メッセージボトル" style="border-radius: 8px;" /></a>
+<a href="https://open.spotify.com/track/6sNWW9qJ6L9ZbVEpGNs8lG"><img src="https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e028743be7ce279a82b51013f5a" width="150" height="150" alt="メッセージボトル" style="border-radius: 8px;" /></a>
 
 ### 🥈 2位
 **4回** | [無題](https://open.spotify.com/track/7IkWojxKrQrdGQtZ6jEcWt) - amazarashi ⭐32
