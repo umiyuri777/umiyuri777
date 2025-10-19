@@ -154,8 +154,10 @@ class SpotifyActivityUpdater:
 
             # カードHTML
             card_html_parts = []
-            card_html_parts.append('<div style="position: relative; width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 12px; padding: 12px;">')
-            card_html_parts.append(f'<span style="position:absolute; top:8px; left:8px; background:#1f6feb; color:#ffffff; font-weight:700; font-size:12px; padding:2px 8px; border-radius:999px;">{rank_emoji} {i}</span>')
+            card_html_parts.append('<div style="position: relative; background: #0d1117; border: 1px solid #30363d; border-radius: 12px; padding: 12px;">')
+            card_html_parts.append('<div style="display:flex; align-items:center; margin-bottom:8px;">')
+            card_html_parts.append(f'<span style="background:#1f6feb; color:#ffffff; font-weight:700; font-size:12px; padding:2px 8px; border-radius:999px;">{rank_emoji} {i}</span>')
+            card_html_parts.append('</div>')
             link_start = f'<a href="{spotify_url}" style="text-decoration:none; color: inherit;">' if spotify_url else '<div>'
             link_end = '</a>' if spotify_url else '</div>'
             card_html_parts.append(link_start)
