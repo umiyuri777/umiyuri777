@@ -5,14 +5,19 @@ SupabaseからSpotifyログを取得してREADME.mdを更新するスクリプ�
 
 import os
 import json
+import logging
 from datetime import datetime, timedelta
 from supabase import create_client, Client
-from typing import List, Dict, Any
-
+from typing import List, Dict, Any, Optional
+from dotenv import load_dotenv
 
 class SpotifyActivityUpdater:
     def __init__(self):
         """Supabaseクライアントを初期化"""
+        # ログ設定
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+        self.logger = logging.getLogger(__name__)
+        
         self.supabase_url = os.getenv('SUPABASE_URL')
         self.supabase_key = os.getenv('SUPABASE_KEY')
         
@@ -20,6 +25,7 @@ class SpotifyActivityUpdater:
             raise ValueError("SUPABASE_URL と SUPABASE_KEY の環境変数が設定されていません")
         
         self.supabase: Client = create_client(self.supabase_url, self.supabase_key)
+        self.logger.info("Supabaseクライアントが初期化されました")
     
     def get_recent_spotify_logs(self, days: int = 7) -> List[Dict[str, Any]]:
         """
@@ -34,6 +40,7 @@ class SpotifyActivityUpdater:
         try:
             # 過去N日間のデータを取得
             start_date = datetime.now() - timedelta(days=days)
+            self.logger.info(f"過去{days}日間のSpotifyログを取得開始 (開始日: {start_date.isoformat()})")
             
             # Supabaseからデータを取得（played_atでフィルタリング）
             response = self.supabase.table('spotify_logs').select(
@@ -42,10 +49,19 @@ class SpotifyActivityUpdater:
                 'played_at', start_date.isoformat()
             ).order('played_at', desc=True).execute()
             
-            return response.data if response.data else []
+            # レスポンスをJSONとして処理
+            if hasattr(response, 'data') and response.data:
+                self.logger.info(f"{len(response.data)}件のログを取得しました")
+                # JSONデータをログ出力（デバッグ用）
+                self.logger.debug(f"取得したデータ: {json.dumps(response.data[:2], ensure_ascii=False, indent=2)}")
+                return response.data
+            else:
+                self.logger.warning("レスポンスにデータが含まれていません")
+                return []
             
         except Exception as e:
-            print(f"Spotifyログの取得中にエラーが発生しました: {e}")
+            self.logger.error(f"Spotifyログの取得中にエラーが発生しました: {e}")
+            self.logger.error(f"エラーの詳細: {str(e)}")
             return []
     
     def format_spotify_logs(self, logs: List[Dict[str, Any]]) -> str:
@@ -59,7 +75,10 @@ class SpotifyActivityUpdater:
             整形されたMarkdown文字列
         """
         if not logs:
+            self.logger.info("ログが空のため、デフォルトメッセージを返します")
             return "🎵 最近の音楽活動はありません"
+        
+        self.logger.info(f"{len(logs)}件のログをMarkdown形式に整形開始")
         
         markdown_lines = ["## 🎵 Recent Music Activity"]
         markdown_lines.append("")
@@ -114,7 +133,7 @@ class SpotifyActivityUpdater:
                 
                 # Spotifyリンクを追加（もしあれば）
                 spotify_link = ""
-                if external_urls and external_urls.get('spotify'):
+                if external_urls and isinstance(external_urls, dict) and 'spotify' in external_urls:
                     spotify_link = f" [🎵]({external_urls['spotify']})"
                 
                 # アルバム名を表示（もしあれば）
@@ -139,7 +158,9 @@ class SpotifyActivityUpdater:
                 markdown_lines.append(f"- **平均人気度**: {stats['avg_popularity']:.1f}")
             markdown_lines.append("")
         
-        return "\n".join(markdown_lines)
+        result = "\n".join(markdown_lines)
+        self.logger.info(f"Markdown形式の整形が完了しました (文字数: {len(result)})")
+        return result
     
     def _format_date(self, date_str: str) -> str:
         """日付文字列を日本語形式に整形"""
@@ -152,7 +173,10 @@ class SpotifyActivityUpdater:
     def _calculate_stats(self, logs: List[Dict[str, Any]]) -> Dict[str, Any]:
         """ログから統計情報を計算"""
         if not logs:
+            self.logger.info("ログが空のため、統計情報を計算しません")
             return {}
+        
+        self.logger.info("統計情報の計算を開始")
         
         total_plays = len(logs)
         unique_tracks = len(set(log.get('track_name', '') for log in logs))
@@ -166,13 +190,16 @@ class SpotifyActivityUpdater:
         popularities = [log.get('popularity', 0) for log in logs if log.get('popularity', 0) > 0]
         avg_popularity = sum(popularities) / len(popularities) if popularities else 0
         
-        return {
+        stats = {
             'total_plays': total_plays,
             'unique_tracks': unique_tracks,
             'unique_artists': unique_artists,
             'total_duration': f"{total_duration_hours:.1f}時間",
             'avg_popularity': avg_popularity
         }
+        
+        self.logger.info(f"統計情報の計算完了: {json.dumps(stats, ensure_ascii=False)}")
+        return stats
     
     def update_readme(self, spotify_content: str):
         """
@@ -184,6 +211,8 @@ class SpotifyActivityUpdater:
         readme_path = 'README.md'
         
         try:
+            self.logger.info("README.mdの更新を開始")
+            
             # 既存のREADME.mdを読み込み
             with open(readme_path, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -205,6 +234,7 @@ class SpotifyActivityUpdater:
                     end_marker + 
                     content[end_pos + len(end_marker):]
                 )
+                self.logger.info("既存のSpotifyセクションを置換しました")
             else:
                 # 新しいセクションを追加（Activitiesセクションの前に挿入）
                 activities_pos = content.find("## 🏃‍♀️ Activities")
@@ -216,42 +246,48 @@ class SpotifyActivityUpdater:
                         end_marker + "\n\n" + 
                         content[activities_pos:]
                     )
+                    self.logger.info("Activitiesセクションの前にSpotifyセクションを追加しました")
                 else:
                     # Activitiesセクションが見つからない場合は末尾に追加
                     new_content = content + "\n\n" + start_marker + "\n" + spotify_content + "\n" + end_marker
+                    self.logger.info("ファイル末尾にSpotifyセクションを追加しました")
             
             # ファイルに書き込み
             with open(readme_path, 'w', encoding='utf-8') as f:
                 f.write(new_content)
             
-            print("README.mdが正常に更新されました")
+            self.logger.info("README.mdが正常に更新されました")
             
         except Exception as e:
-            print(f"README.mdの更新中にエラーが発生しました: {e}")
+            self.logger.error(f"README.mdの更新中にエラーが発生しました: {e}")
+            self.logger.error(f"エラーの詳細: {str(e)}")
             raise
     
     def run(self):
         """メイン実行関数"""
         try:
-            print("Spotifyログの取得を開始...")
+            self.logger.info("Spotifyログの取得を開始...")
             logs = self.get_recent_spotify_logs()
-            print(f"{len(logs)}件のログを取得しました")
+            self.logger.info(f"{len(logs)}件のログを取得しました")
             
-            print("ログの整形を開始...")
+            self.logger.info("ログの整形を開始...")
             formatted_content = self.format_spotify_logs(logs)
             
-            print("README.mdの更新を開始...")
+            self.logger.info("README.mdの更新を開始...")
             self.update_readme(formatted_content)
             
-            print("すべての処理が完了しました！")
+            self.logger.info("すべての処理が完了しました！")
             
         except Exception as e:
-            print(f"処理中にエラーが発生しました: {e}")
+            self.logger.error(f"処理中にエラーが発生しました: {e}")
+            self.logger.error(f"エラーの詳細: {str(e)}")
             raise
 
 
 def main():
     """メイン関数"""
+    load_dotenv()
+    
     updater = SpotifyActivityUpdater()
     updater.run()
 
