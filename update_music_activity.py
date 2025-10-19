@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from supabase import create_client, Client
 from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
+import httpx
 
 class SpotifyActivityUpdater:
     def __init__(self):
@@ -255,12 +256,12 @@ class SpotifyActivityUpdater:
             if external_urls and isinstance(external_urls, dict) and 'spotify' in external_urls:
                 spotify_url = external_urls['spotify']
             
-            # ジャケ写のURLを生成（Spotify Web APIの画像URL）
-            # album_idが存在する場合は、Spotifyの画像URLを生成
+            # ジャケ写のURLを取得（oEmbedからthumbnail_urlを使用）
+            # external_urlsが無い場合はtrack_idからURLを生成してフォールバック
             album_art_url = ""
-            if album_id:
-                # SpotifyのアルバムアートワークURL（300x300サイズ）
-                album_art_url = f"https://i.scdn.co/image/ab67616d0000b273{album_id}"
+            oembed_target_url = spotify_url or (f"https://open.spotify.com/track/{track_id}" if track_id else "")
+            if oembed_target_url:
+                album_art_url = self._get_album_art_via_oembed(oembed_target_url)
             
             # ランキング表示
             rank_emoji = self._get_rank_emoji(i)
@@ -291,6 +292,31 @@ class SpotifyActivityUpdater:
         self.logger.info(f"ランキングMarkdown形式の整形が完了しました (文字数: {len(result)})")
         return result
     
+    def _get_album_art_via_oembed(self, spotify_url: str) -> str:
+        """Spotify oEmbed APIからthumbnail_urlを取得して返す。
+        ネットワークエラーや予期しないレスポンス時は空文字を返す。
+        """
+        if not spotify_url:
+            return ""
+        try:
+            response = httpx.get(
+                "https://open.spotify.com/oembed",
+                params={"url": spotify_url},
+                timeout=10.0,
+                follow_redirects=True,
+            )
+            if response.status_code != 200:
+                self.logger.warning(f"oEmbedの取得に失敗しました (status={response.status_code}) url={spotify_url}")
+                return ""
+            data = response.json()
+            thumbnail_url = data.get("thumbnail_url", "")
+            if isinstance(thumbnail_url, str):
+                return thumbnail_url
+            return ""
+        except Exception as e:
+            self.logger.warning(f"oEmbed取得中に例外が発生しました: {e}")
+            return ""
+
     def _get_rank_emoji(self, rank: int) -> str:
         """ランキングに応じた絵文字を返す"""
         if rank == 1:
