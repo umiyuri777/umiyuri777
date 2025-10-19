@@ -11,6 +11,7 @@ from supabase import create_client, Client
 from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
 import httpx
+from html import escape
 
 class SpotifyActivityUpdater:
     def __init__(self):
@@ -94,66 +95,87 @@ class SpotifyActivityUpdater:
         """
         if not ranking:
             self.logger.info("ランキングが空のため、デフォルトメッセージを返します")
-            return "🏆 ランキングデータがありません"
+            empty_html = [
+                "## 🏆 Top Tracks (過去1週間)",
+                "",
+                '<div style="padding: 14px; border: 1px dashed #30363d; border-radius: 12px; color: #8b949e; background: #0d1117;">',
+                'データがありません。Spotifyで音楽を再生するとここにランキングが表示されます。',
+                '</div>'
+            ]
+            return "\n".join(empty_html)
         
         self.logger.info(f"{len(ranking)}曲のランキングをMarkdown形式に整形開始")
         
         markdown_lines = ["## 🏆 Top Tracks (過去1週間)"]
         markdown_lines.append("")
-        
-        # ランキング表示（ジャケ写付き）
+        markdown_lines.append('<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: stretch;">')
+
+        # ランキング表示（カード型）
         for i, track in enumerate(ranking, 1):
-            track_name = track.get('track_name', 'Unknown Track')
-            artist_name = track.get('artist_name', 'Unknown Artist')
-            album_name = track.get('album_name', '')
+            track_name_raw = track.get('track_name', 'Unknown Track')
+            artist_name_raw = track.get('artist_name', 'Unknown Artist')
+            album_name_raw = track.get('album_name', '')
             album_id = track.get('album_id', '')
             track_id = track.get('track_id', '')
             external_urls_raw = track.get('external_urls', {})
             play_count = track.get('play_count', 0)
             popularity = track.get('popularity', 0)
-            
+
+            # HTMLエスケープ
+            track_name = escape(str(track_name_raw))
+            artist_name = escape(str(artist_name_raw))
+            album_name = escape(str(album_name_raw))
+
             # external_urlsをJSON文字列から辞書型にキャスト
             external_urls = self._parse_external_urls(external_urls_raw)
-            
+
             # Spotifyリンクを取得
             spotify_url = ""
             if external_urls and isinstance(external_urls, dict) and 'spotify' in external_urls:
                 spotify_url = external_urls['spotify']
-            
+
             # ジャケ写のURLを取得（oEmbedからthumbnail_urlを使用）
             # external_urlsが無い場合はtrack_idからURLを生成してフォールバック
             album_art_url = ""
             oembed_target_url = spotify_url or (f"https://open.spotify.com/track/{track_id}" if track_id else "")
             if oembed_target_url:
                 album_art_url = self._get_album_art_via_oembed(oembed_target_url)
-            
+
             # ランキング表示
             rank_emoji = self._get_rank_emoji(i)
-            
-            # 人気度を表示
-            popularity_str = ""
-            if popularity and popularity > 0:
-                popularity_str = f" ⭐{popularity}"
-            
-            # ジャケ写付きの表示
-            if album_art_url and spotify_url:
-                # ジャケ写をクリック可能にしてSpotifyリンクに飛ばす
-                markdown_lines.append(f"### {rank_emoji} {i}位")
-                markdown_lines.append(f"**{play_count}回** | [{track_name}]({spotify_url}) - {artist_name}{popularity_str}")
-                markdown_lines.append(f"<a href=\"{spotify_url}\"><img src=\"{album_art_url}\" width=\"150\" height=\"150\" alt=\"{album_name}\" style=\"border-radius: 8px;\" /></a>")
-            elif spotify_url:
-                # Spotifyリンクのみの場合
-                markdown_lines.append(f"### {rank_emoji} {i}位")
-                markdown_lines.append(f"**{play_count}回** | [{track_name}]({spotify_url}) - {artist_name}{popularity_str}")
-            else:
-                # リンクなしの場合
-                markdown_lines.append(f"### {rank_emoji} {i}位")
-                markdown_lines.append(f"**{play_count}回** | **{track_name}** - {artist_name}{popularity_str}")
-            
-            markdown_lines.append("")
-        
+
+            # バッジ（再生回数）
+            badges_html = [
+                f'<span style="background:#21262d; color:#c9d1d9; border:1px solid #30363d; border-radius:999px; padding:2px 8px; font-size:12px;">🔥{play_count}</span>'
+            ]
+
+            # 画像要素
+            image_src = album_art_url or 'https://placehold.co/600x600/0d1117/8b949e?text=No+Art'
+
+            # カードHTML
+            card_html_parts = []
+            card_html_parts.append('<div style="position: relative; width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 12px; padding: 12px;">')
+            card_html_parts.append(f'<span style="position:absolute; top:8px; left:8px; background:#1f6feb; color:#ffffff; font-weight:700; font-size:12px; padding:2px 8px; border-radius:999px;">{rank_emoji} {i}</span>')
+            link_start = f'<a href="{spotify_url}" style="text-decoration:none; color: inherit;">' if spotify_url else '<div>'
+            link_end = '</a>' if spotify_url else '</div>'
+            card_html_parts.append(link_start)
+            card_html_parts.append(f'<img src="{image_src}" alt="{album_name}" style="width:100%; height: 180px; object-fit: cover; border-radius: 8px; display:block;" />')
+            card_html_parts.append(link_end)
+            card_html_parts.append('<div style="margin-top:10px;">')
+            card_html_parts.append(f'<div style="font-weight:700; font-size:14px; line-height:1.35; color:#c9d1d9;">{track_name}</div>')
+            card_html_parts.append(f'<div style="color:#8b949e; font-size:12px; margin-top:2px;">{artist_name}</div>')
+            card_html_parts.append('<div style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">' + "".join(badges_html) + '</div>')
+            if spotify_url:
+                card_html_parts.append(f'<a href="{spotify_url}" style="display:inline-block; margin-top:10px; background:#238636; color:#ffffff; border-radius:8px; padding:6px 10px; font-weight:600; font-size:12px; text-decoration:none;">Listen on Spotify</a>')
+            card_html_parts.append('</div>')  # inner content
+            card_html_parts.append('</div>')  # card
+
+            markdown_lines.append("".join(card_html_parts))
+
+        markdown_lines.append('</div>')
+
         result = "\n".join(markdown_lines)
-        self.logger.info(f"ランキングMarkdown形式の整形が完了しました (文字数: {len(result)})")
+        self.logger.info(f"ランキングHTMLの整形が完了しました (文字数: {len(result)})")
         return result
     
     def _get_album_art_via_oembed(self, spotify_url: str) -> str:
