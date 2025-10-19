@@ -150,7 +150,7 @@ class SpotifyActivityUpdater:
 
             cell_parts = []
             cell_parts.append('<td valign="top">')
-            cell_parts.append(f'<h4>{rank_emoji} {i}</h4>')
+            cell_parts.append(f'<div><strong>{rank_emoji} {i}</strong></div>')
             if spotify_url:
                 cell_parts.append(f'<a href="{spotify_url}"><img src="{image_src}" alt="{album_name}" width="220" /></a>')
             else:
