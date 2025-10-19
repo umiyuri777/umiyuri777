@@ -97,7 +97,7 @@ class SpotifyActivityUpdater:
         if not ranking:
             self.logger.info("ランキングが空のため、デフォルトメッセージを返します")
             empty_html = [
-                "## 🏆 Top Tracks (過去1週間)",
+                "## 🏆 Top Tracks (last 7 days)",
                 "",
                 "データがありません。Spotifyで音楽を再生するとここにランキングが表示されます。",
             ]
@@ -105,7 +105,7 @@ class SpotifyActivityUpdater:
         
         self.logger.info(f"{len(ranking)}曲のランキングをMarkdown形式に整形開始")
         
-        markdown_lines = ["## 🏆 Top Tracks (過去1週間)"]
+        markdown_lines = ["## 🏆 Top Tracks (last 7 days)"]
         markdown_lines.append("")
         markdown_lines.append('<table>')
 
