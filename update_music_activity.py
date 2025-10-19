@@ -28,43 +28,6 @@ class SpotifyActivityUpdater:
         self.supabase: Client = create_client(self.supabase_url, self.supabase_key)
         self.logger.info("Supabaseクライアントが初期化されました")
     
-    def get_recent_spotify_logs(self, days: int = 7) -> List[Dict[str, Any]]:
-        """
-        指定された日数分のSpotifyログを取得
-        
-        Args:
-            days: 取得する日数（デフォルト: 7日）
-            
-        Returns:
-            Spotifyログのリスト
-        """
-        try:
-            # 過去N日間のデータを取得
-            start_date = datetime.now() - timedelta(days=days)
-            self.logger.info(f"過去{days}日間のSpotifyログを取得開始 (開始日: {start_date.isoformat()})")
-            
-            # Supabaseからデータを取得（played_atでフィルタリング）
-            response = self.supabase.table('spotify_logs').select(
-                'track_name, artist_name, album_name, played_at, duration_ms, popularity, external_urls'
-            ).gte(
-                'played_at', start_date.isoformat()
-            ).order('played_at', desc=True).execute()
-            
-            # レスポンスをJSONとして処理
-            if hasattr(response, 'data') and response.data:
-                self.logger.info(f"{len(response.data)}件のログを取得しました")
-                # JSONデータをログ出力（デバッグ用）
-                self.logger.debug(f"取得したデータ: {json.dumps(response.data[:2], ensure_ascii=False, indent=2)}")
-                return response.data
-            else:
-                self.logger.warning("レスポンスにデータが含まれていません")
-                return []
-            
-        except Exception as e:
-            self.logger.error(f"Spotifyログの取得中にエラーが発生しました: {e}")
-            self.logger.error(f"エラーの詳細: {str(e)}")
-            return []
-    
     def get_track_ranking(self, days: int = 7, limit: int = 10) -> List[Dict[str, Any]]:
         """
         指定された日数分の楽曲ランキングを取得
@@ -264,45 +227,6 @@ class SpotifyActivityUpdater:
         except Exception as e:
             self.logger.error(f"external_urlsの処理中にエラーが発生しました: {e}")
             return {}
-    
-    def _format_date(self, date_str: str) -> str:
-        """日付文字列を日本語形式に整形"""
-        try:
-            date_obj = datetime.fromisoformat(date_str)
-            return date_obj.strftime('%Y年%m月%d日')
-        except:
-            return date_str
-    
-    def _calculate_stats(self, logs: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """ログから統計情報を計算"""
-        if not logs:
-            self.logger.info("ログが空のため、統計情報を計算しません")
-            return {}
-        
-        self.logger.info("統計情報の計算を開始")
-        
-        total_plays = len(logs)
-        unique_tracks = len(set(log.get('track_name', '') for log in logs))
-        unique_artists = len(set(log.get('artist_name', '') for log in logs))
-        
-        # 総再生時間を計算
-        total_duration_ms = sum(log.get('duration_ms', 0) for log in logs)
-        total_duration_hours = total_duration_ms / (1000 * 60 * 60)
-        
-        # 平均人気度を計算
-        popularities = [log.get('popularity', 0) for log in logs if log.get('popularity', 0) > 0]
-        avg_popularity = sum(popularities) / len(popularities) if popularities else 0
-        
-        stats = {
-            'total_plays': total_plays,
-            'unique_tracks': unique_tracks,
-            'unique_artists': unique_artists,
-            'total_duration': f"{total_duration_hours:.1f}時間",
-            'avg_popularity': avg_popularity
-        }
-        
-        self.logger.info(f"統計情報の計算完了: {json.dumps(stats, ensure_ascii=False)}")
-        return stats
     
     def update_readme(self, spotify_content: str):
         """
