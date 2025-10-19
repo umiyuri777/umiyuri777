@@ -12,6 +12,7 @@ from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
 import httpx
 from html import escape
+from urllib.parse import quote
 
 class SpotifyActivityUpdater:
     def __init__(self):
@@ -144,8 +145,8 @@ class SpotifyActivityUpdater:
             # ランキング表示
             rank_emoji = self._get_rank_emoji(i)
 
-            # 画像要素（幅のみ指定）
-            image_src = album_art_url or 'https://placehold.co/300x300?text=No+Art'
+            # 画像要素（プロキシ経由で角丸に変換）
+            image_src = self._rounded_image_url(album_art_url, 220)
 
             cell_parts = []
             cell_parts.append('<td valign="top">')
@@ -181,6 +182,17 @@ class SpotifyActivityUpdater:
         result = "\n".join(markdown_lines)
         self.logger.info(f"ランキング(テーブル版)の整形が完了しました (文字数: {len(result)})")
         return result
+
+    def _rounded_image_url(self, source_url: str, size: int) -> str:
+        """画像を画像プロキシ(wsrv.nl)経由で角丸(円形)に変換したURLを返す。
+        GitHubのMarkdownではstyleが使えないため、URL側で加工して角丸を実現する。
+        """
+        base = "https://wsrv.nl/?url="
+        if not source_url:
+            encoded = quote("https://placehold.co/300x300?text=No+Art", safe="")
+        else:
+            encoded = quote(source_url, safe="")
+        return f"{base}{encoded}&w={size}&h={size}&fit=cover&mask=ellipse"
     
     def _get_album_art_via_oembed(self, spotify_url: str) -> str:
         """Spotify oEmbed APIからthumbnail_urlを取得して返す。
