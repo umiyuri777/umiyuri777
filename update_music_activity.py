@@ -64,6 +64,60 @@ class SpotifyActivityUpdater:
             self.logger.error(f"エラーの詳細: {str(e)}")
             return []
     
+    def get_track_ranking(self, days: int = 7, limit: int = 10) -> List[Dict[str, Any]]:
+        """
+        指定された日数分の楽曲ランキングを取得
+        
+        Args:
+            days: 取得する日数（デフォルト: 7日）
+            limit: 取得する楽曲数（デフォルト: 10曲）
+            
+        Returns:
+            楽曲ランキングのリスト
+        """
+        try:
+            # 過去N日間のデータを取得
+            start_date = datetime.now() - timedelta(days=days)
+            self.logger.info(f"過去{days}日間の楽曲ランキングを取得開始 (開始日: {start_date.isoformat()})")
+            
+            # Supabaseからランキングデータを取得
+            response = self.supabase.table('spotify_logs').select(
+                'track_name, artist_name, album_name, track_id, album_id, external_urls, popularity'
+            ).gte(
+                'played_at', start_date.isoformat()
+            ).execute()
+            
+            if hasattr(response, 'data') and response.data:
+                # 楽曲ごとに再生回数を集計
+                track_counts = {}
+                for log in response.data:
+                    track_key = f"{log.get('track_name', '')}|{log.get('artist_name', '')}"
+                    if track_key not in track_counts:
+                        track_counts[track_key] = {
+                            'track_name': log.get('track_name', ''),
+                            'artist_name': log.get('artist_name', ''),
+                            'album_name': log.get('album_name', ''),
+                            'track_id': log.get('track_id', ''),
+                            'album_id': log.get('album_id', ''),
+                            'external_urls': log.get('external_urls', {}),
+                            'popularity': log.get('popularity', 0),
+                            'play_count': 0
+                        }
+                    track_counts[track_key]['play_count'] += 1
+                
+                # 再生回数でソートして上位を取得
+                ranking = sorted(track_counts.values(), key=lambda x: x['play_count'], reverse=True)[:limit]
+                
+                self.logger.info(f"{len(ranking)}曲のランキングを取得しました")
+                return ranking
+            else:
+                self.logger.warning("ランキングデータが取得できませんでした")
+                return []
+            
+        except Exception as e:
+            self.logger.error(f"楽曲ランキングの取得中にエラーが発生しました: {e}")
+            return []
+    
     def format_spotify_logs(self, logs: List[Dict[str, Any]]) -> str:
         """
         SpotifyログをMarkdown形式に整形
@@ -133,8 +187,9 @@ class SpotifyActivityUpdater:
                 
                 # Spotifyリンクを追加（もしあれば）
                 spotify_link = ""
-                if external_urls and isinstance(external_urls, dict) and 'spotify' in external_urls:
-                    spotify_link = f" [🎵]({external_urls['spotify']})"
+                external_urls_parsed = self._parse_external_urls(external_urls)
+                if external_urls_parsed and isinstance(external_urls_parsed, dict) and 'spotify' in external_urls_parsed:
+                    spotify_link = f" [🎵]({external_urls_parsed['spotify']})"
                 
                 # アルバム名を表示（もしあれば）
                 album_str = f" - *{album_name}*" if album_name else ""
@@ -161,6 +216,127 @@ class SpotifyActivityUpdater:
         result = "\n".join(markdown_lines)
         self.logger.info(f"Markdown形式の整形が完了しました (文字数: {len(result)})")
         return result
+    
+    def format_track_ranking(self, ranking: List[Dict[str, Any]]) -> str:
+        """
+        楽曲ランキングをMarkdown形式に整形
+        
+        Args:
+            ranking: 楽曲ランキングのリスト
+            
+        Returns:
+            整形されたMarkdown文字列
+        """
+        if not ranking:
+            self.logger.info("ランキングが空のため、デフォルトメッセージを返します")
+            return "🏆 ランキングデータがありません"
+        
+        self.logger.info(f"{len(ranking)}曲のランキングをMarkdown形式に整形開始")
+        
+        markdown_lines = ["## 🏆 Top Tracks (過去1週間)"]
+        markdown_lines.append("")
+        
+        # ランキング表示（ジャケ写付き）
+        for i, track in enumerate(ranking, 1):
+            track_name = track.get('track_name', 'Unknown Track')
+            artist_name = track.get('artist_name', 'Unknown Artist')
+            album_name = track.get('album_name', '')
+            album_id = track.get('album_id', '')
+            track_id = track.get('track_id', '')
+            external_urls_raw = track.get('external_urls', {})
+            play_count = track.get('play_count', 0)
+            popularity = track.get('popularity', 0)
+            
+            # external_urlsをJSON文字列から辞書型にキャスト
+            external_urls = self._parse_external_urls(external_urls_raw)
+            
+            # Spotifyリンクを取得
+            spotify_url = ""
+            if external_urls and isinstance(external_urls, dict) and 'spotify' in external_urls:
+                spotify_url = external_urls['spotify']
+            
+            # ジャケ写のURLを生成（Spotify Web APIの画像URL）
+            # album_idが存在する場合は、Spotifyの画像URLを生成
+            album_art_url = ""
+            if album_id:
+                # SpotifyのアルバムアートワークURL（300x300サイズ）
+                album_art_url = f"https://i.scdn.co/image/ab67616d0000b273{album_id}"
+            
+            # ランキング表示
+            rank_emoji = self._get_rank_emoji(i)
+            
+            # 人気度を表示
+            popularity_str = ""
+            if popularity and popularity > 0:
+                popularity_str = f" ⭐{popularity}"
+            
+            # ジャケ写付きの表示
+            if album_art_url and spotify_url:
+                # ジャケ写をクリック可能にしてSpotifyリンクに飛ばす
+                markdown_lines.append(f"### {rank_emoji} {i}位")
+                markdown_lines.append(f"**{play_count}回** | [{track_name}]({spotify_url}) - {artist_name}{popularity_str}")
+                markdown_lines.append(f"<a href=\"{spotify_url}\"><img src=\"{album_art_url}\" width=\"150\" height=\"150\" alt=\"{album_name}\" style=\"border-radius: 8px;\" /></a>")
+            elif spotify_url:
+                # Spotifyリンクのみの場合
+                markdown_lines.append(f"### {rank_emoji} {i}位")
+                markdown_lines.append(f"**{play_count}回** | [{track_name}]({spotify_url}) - {artist_name}{popularity_str}")
+            else:
+                # リンクなしの場合
+                markdown_lines.append(f"### {rank_emoji} {i}位")
+                markdown_lines.append(f"**{play_count}回** | **{track_name}** - {artist_name}{popularity_str}")
+            
+            markdown_lines.append("")
+        
+        result = "\n".join(markdown_lines)
+        self.logger.info(f"ランキングMarkdown形式の整形が完了しました (文字数: {len(result)})")
+        return result
+    
+    def _get_rank_emoji(self, rank: int) -> str:
+        """ランキングに応じた絵文字を返す"""
+        if rank == 1:
+            return "🥇"
+        elif rank == 2:
+            return "🥈"
+        elif rank == 3:
+            return "🥉"
+        else:
+            return "🎵"
+    
+    def _parse_external_urls(self, external_urls_raw) -> Dict[str, Any]:
+        """
+        external_urlsをJSON文字列から辞書型にキャスト
+        
+        Args:
+            external_urls_raw: JSON文字列または辞書型のデータ
+            
+        Returns:
+            辞書型のexternal_urls
+        """
+        try:
+            # 既に辞書型の場合はそのまま返す
+            if isinstance(external_urls_raw, dict):
+                return external_urls_raw
+            
+            # 文字列の場合はJSONパース
+            if isinstance(external_urls_raw, str):
+                if external_urls_raw.strip():  # 空文字列でない場合
+                    parsed = json.loads(external_urls_raw)
+                    self.logger.debug(f"JSON文字列をパースしました: {parsed}")
+                    return parsed
+                else:
+                    return {}
+            
+            # その他の型の場合は空辞書を返す
+            self.logger.warning(f"予期しない型のexternal_urls: {type(external_urls_raw)}")
+            return {}
+            
+        except json.JSONDecodeError as e:
+            self.logger.error(f"external_urlsのJSONパースエラー: {e}")
+            self.logger.error(f"パース対象データ: {external_urls_raw}")
+            return {}
+        except Exception as e:
+            self.logger.error(f"external_urlsの処理中にエラーが発生しました: {e}")
+            return {}
     
     def _format_date(self, date_str: str) -> str:
         """日付文字列を日本語形式に整形"""
@@ -270,11 +446,21 @@ class SpotifyActivityUpdater:
             logs = self.get_recent_spotify_logs()
             self.logger.info(f"{len(logs)}件のログを取得しました")
             
-            self.logger.info("ログの整形を開始...")
-            formatted_content = self.format_spotify_logs(logs)
+            self.logger.info("楽曲ランキングの取得を開始...")
+            ranking = self.get_track_ranking()
+            self.logger.info(f"{len(ranking)}曲のランキングを取得しました")
+            
+            # self.logger.info("ログの整形を開始...")
+            # formatted_content = self.format_spotify_logs(logs)
+            
+            self.logger.info("ランキングの整形を開始...")
+            ranking_content = self.format_track_ranking(ranking)
+            
+            # ランキングとログを結合
+            combined_content = ranking_content
             
             self.logger.info("README.mdの更新を開始...")
-            self.update_readme(formatted_content)
+            self.update_readme(combined_content)
             
             self.logger.info("すべての処理が完了しました！")
             
