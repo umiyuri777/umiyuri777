@@ -28,6 +28,8 @@
   <img alt="github stats" height="170px" src="https://github-readme-stats.vercel.app/api/top-langs/?username=umiyuri777&theme=vue-dark&layout=compact" />
 </div>
 
+<!-- SPOTIFY_ACTIVITY_START -->
+<!-- SPOTIFY_ACTIVITY_END -->
 
 <!--
 This repository is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
