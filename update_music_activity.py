@@ -159,7 +159,10 @@ class SpotifyActivityUpdater:
             link_start = f'<a href="{spotify_url}" style="text-decoration:none; color: inherit;">' if spotify_url else '<div>'
             link_end = '</a>' if spotify_url else '</div>'
             card_html_parts.append(link_start)
-            card_html_parts.append(f'<img src="{image_src}" alt="{album_name}" style="width:100%; height: 180px; object-fit: cover; border-radius: 8px; display:block;" />')
+            # 画像の縦横比を固定（正方形）。中身は object-fit: cover でクロップ
+            card_html_parts.append('<div style="position: relative; width: 100%; padding-top: 100%; overflow: hidden; border-radius: 8px; background: #161b22;">')
+            card_html_parts.append(f'<img src="{image_src}" alt="{album_name}" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; display:block;" />')
+            card_html_parts.append('</div>')
             card_html_parts.append(link_end)
             card_html_parts.append('<div style="margin-top:10px;">')
             card_html_parts.append(f'<div style="font-weight:700; font-size:14px; line-height:1.35; color:#c9d1d9;">{track_name}</div>')
