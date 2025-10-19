@@ -157,7 +157,7 @@ class SpotifyActivityUpdater:
                 cell_parts.append(f'<img src="{image_src}" alt="{album_name}" width="220" />')
             cell_parts.append('<br/>')
             if spotify_url:
-                cell_parts.append(f'<div><strong><a href="{spotify_url}">{track_name}</a></strong></div>')
+                cell_parts.append(f'<div><strong>{track_name}</strong></div>')
             else:
                 cell_parts.append(f'<div><strong>{track_name}</strong></div>')
             cell_parts.append(f'<div><small>{artist_name}</small></div>')
