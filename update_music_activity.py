@@ -369,22 +369,15 @@ class SpotifyActivityUpdater:
     def run(self):
         """メイン実行関数"""
         try:
-            self.logger.info("Spotifyログの取得を開始...")
-            logs = self.get_recent_spotify_logs()
-            self.logger.info(f"{len(logs)}件のログを取得しました")
-            
             self.logger.info("楽曲ランキングの取得を開始...")
             ranking = self.get_track_ranking(limit=3)
             self.logger.info(f"{len(ranking)}曲のランキングを取得しました")
             
             self.logger.info("ランキングの整形を開始...")
             ranking_content = self.format_track_ranking(ranking)
-            
-            # ランキングとログを結合
-            combined_content = ranking_content
-            
+        
             self.logger.info("README.mdの更新を開始...")
-            self.update_readme(combined_content)
+            self.update_readme(ranking_content)
             
             self.logger.info("すべての処理が完了しました！")
             
