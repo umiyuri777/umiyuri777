@@ -149,17 +149,17 @@ class SpotifyActivityUpdater:
 
             cell_parts = []
             cell_parts.append('<td valign="top">')
-            cell_parts.append(f'<div><b>{rank_emoji} {i}</b></div>')
+            cell_parts.append(f'<h4>{rank_emoji} {i}</h4>')
             if spotify_url:
                 cell_parts.append(f'<a href="{spotify_url}"><img src="{image_src}" alt="{album_name}" width="220" /></a>')
             else:
                 cell_parts.append(f'<img src="{image_src}" alt="{album_name}" width="220" />')
             cell_parts.append('<br/>')
             if spotify_url:
-                cell_parts.append(f'<div><a href="{spotify_url}">{track_name}</a></div>')
+                cell_parts.append(f'<div><strong><a href="{spotify_url}">{track_name}</a></strong></div>')
             else:
-                cell_parts.append(f'<div>{track_name}</div>')
-            cell_parts.append(f'<div>{artist_name}</div>')
+                cell_parts.append(f'<div><strong>{track_name}</strong></div>')
+            cell_parts.append(f'<div><small>{artist_name}</small></div>')
             cell_parts.append(f'<div>🔥{play_count}</div>')
             if spotify_url:
                 cell_parts.append(f'<div><a href="{spotify_url}"><img src="https://www.scdn.co/i/_global/favicon.png" alt="Spotify" width="20" /></a></div>')
