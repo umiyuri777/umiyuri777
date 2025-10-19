@@ -374,7 +374,7 @@ class SpotifyActivityUpdater:
             self.logger.info(f"{len(logs)}件のログを取得しました")
             
             self.logger.info("楽曲ランキングの取得を開始...")
-            ranking = self.get_track_ranking()
+            ranking = self.get_track_ranking(limit=3)
             self.logger.info(f"{len(ranking)}曲のランキングを取得しました")
             
             self.logger.info("ランキングの整形を開始...")
