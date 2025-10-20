@@ -25,7 +25,14 @@
 <!-- ライトモート：theme=light, ダークモート：theme=dark -->
 <!-- アイコンの選択肢一覧：https://arc.net/l/quote/zizyykfh -->
 ## 🌱 Skills
-<img alt="my skills" src="https://skillicons.dev/icons?theme=dark&perline=7&i=python,fastapi,go,flutter,c,cs,unity,postgresql,mysql,supabase,docker,gcp" />
+### backend
+<img alt="my backend skills" src="https://skillicons.dev/icons?theme=dark&perline=7&i=python,fastapi,go,c,cs" />
+
+### mobile
+<img alt="my mobile skills" src="https://skillicons.dev/icons?theme=dark&perline=7&i=flutter" />
+
+### others
+<img alt="my other skills" src="https://skillicons.dev/icons?theme=dark&perline=7&i=unity,postgresql,mysql,supabase,docker,gcp" />
 <br>
 
 ---
