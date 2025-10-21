@@ -183,6 +183,78 @@ class SpotifyActivityUpdater:
         self.logger.info(f"ランキング(テーブル版)の整形が完了しました (文字数: {len(result)})")
         return result
 
+    def get_latest_track(self) -> Optional[Dict[str, Any]]:
+        """直近で再生した最新トラックを1件取得して返す。
+        取得に失敗した場合は None を返す。
+        """
+        try:
+            response = (
+                self.supabase
+                .table('spotify_logs')
+                .select('track_name, artist_name, album_name, track_id, album_id, external_urls, popularity, played_at')
+                .order('played_at', desc=True)
+                .limit(1)
+                .execute()
+            )
+
+            if hasattr(response, 'data') and response.data:
+                return response.data[0]
+            else:
+                self.logger.info("最新トラックが見つかりませんでした")
+                return None
+        except Exception as e:
+            self.logger.error(f"最新トラック取得中にエラーが発生しました: {e}")
+            return None
+
+    def format_latest_track(self, latest_track: Optional[Dict[str, Any]]) -> str:
+        """最新トラック表示をMarkdown(HTML混在)で整形して返す。"""
+        title = "## 🎧 いま聴いてる"
+        if not latest_track:
+            return "\n".join([title, "", "データがありません。Spotifyで音楽を再生するとここに最新トラックが表示されます。"])
+
+        track_name_raw = latest_track.get('track_name', 'Unknown Track')
+        artist_name_raw = latest_track.get('artist_name', 'Unknown Artist')
+        album_name_raw = latest_track.get('album_name', '')
+        track_id = latest_track.get('track_id', '')
+        external_urls_raw = latest_track.get('external_urls', {})
+        played_at_raw = latest_track.get('played_at', '')
+
+        track_name = escape(str(track_name_raw))
+        artist_name = escape(str(artist_name_raw))
+        album_name = escape(str(album_name_raw))
+        played_at_text = escape(str(played_at_raw))
+
+        external_urls = self._parse_external_urls(external_urls_raw)
+        spotify_url = ""
+        if external_urls and isinstance(external_urls, dict) and 'spotify' in external_urls:
+            spotify_url = external_urls['spotify']
+
+        album_art_url = ""
+        oembed_target_url = spotify_url or (f"https://open.spotify.com/track/{track_id}" if track_id else "")
+        if oembed_target_url:
+            album_art_url = self._get_album_art_via_oembed(oembed_target_url)
+
+        image_src = self._rounded_image_url(album_art_url, 220)
+
+        lines: List[str] = [title, "", '<table><tr>']
+        # アートワーク
+        if spotify_url:
+            lines.append(f'<td valign="middle"><a href="{spotify_url}"><img src="{image_src}" alt="{album_name}" width="220" /></a></td>')
+        else:
+            lines.append(f'<td valign="middle"><img src="{image_src}" alt="{album_name}" width="220" /></td>')
+
+        # テキスト情報
+        info_parts: List[str] = []
+        info_parts.append(f'<div><strong>{track_name}</strong></div>')
+        info_parts.append(f'<div><small>{artist_name}</small></div>')
+        if spotify_url:
+            info_parts.append(f'<div><a href="{spotify_url}"><img src="https://www.scdn.co/i/_global/favicon.png" alt="Spotify" width="20" /></a></div>')
+
+        lines.append(f"<td valign=\"middle\">{''.join(info_parts)}</td>")
+        lines.append('</tr></table>')
+
+        return "\n".join(lines)
+
     def _rounded_image_url(self, source_url: str, size: int) -> str:
         """画像を画像プロキシ(wsrv.nl)経由で角丸(円形)に変換したURLを返す。
         GitHubのMarkdownではstyleが使えないため、URL側で加工して角丸を実現する。
@@ -331,15 +403,24 @@ class SpotifyActivityUpdater:
     def run(self):
         """メイン実行関数"""
         try:
+            self.logger.info("最新トラックの取得を開始...")
+            latest = self.get_latest_track()
+            self.logger.info("最新トラックの取得が完了しました")
+
+            self.logger.info("最新トラックの整形を開始...")
+            latest_content = self.format_latest_track(latest)
+
             self.logger.info("楽曲ランキングの取得を開始...")
             ranking = self.get_track_ranking(limit=3)
             self.logger.info(f"{len(ranking)}曲のランキングを取得しました")
             
             self.logger.info("ランキングの整形を開始...")
             ranking_content = self.format_track_ranking(ranking)
+            
+            combined_content = latest_content + "\n\n" + ranking_content
         
             self.logger.info("README.mdの更新を開始...")
-            self.update_readme(ranking_content)
+            self.update_readme(combined_content)
             
             self.logger.info("すべての処理が完了しました！")
             
