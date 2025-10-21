@@ -50,8 +50,8 @@
 ## 🎧 いま聴いてる
 
 <table><tr>
-<td valign="middle"><a href="https://open.spotify.com/track/6megNXGjmim4OitjZnIn9v"><img src="https://wsrv.nl/?url=https%3A%2F%2Fimage-cdn-ak.spotifycdn.com%2Fimage%2Fab67616d00001e02f038f68827e437530b3a80a8&w=220&h=220&fit=cover&mask=ellipse" alt="BOOTLEG" width="220" /></a></td>
-<td valign="middle"><div><strong>春雷</strong></div><div><small>Kenshi Yonezu</small></div><div><a href="https://open.spotify.com/track/6megNXGjmim4OitjZnIn9v"><img src="https://www.scdn.co/i/_global/favicon.png" alt="Spotify" width="20" /></a></div></td>
+<td valign="middle"><a href="https://open.spotify.com/track/3KnURrjsXA0TDce8N7iOwz"><img src="https://wsrv.nl/?url=https%3A%2F%2Fimage-cdn-ak.spotifycdn.com%2Fimage%2Fab67616d00001e02f038f68827e437530b3a80a8&w=220&h=220&fit=cover&mask=ellipse" alt="BOOTLEG" width="220" /></a></td>
+<td valign="middle"><div><strong>灰色と青 ( + 菅田将暉 )</strong></div><div><small>Kenshi Yonezu</small></div><div><a href="https://open.spotify.com/track/3KnURrjsXA0TDce8N7iOwz"><img src="https://www.scdn.co/i/_global/favicon.png" alt="Spotify" width="20" /></a></div></td>
 </tr></table>
 
 ## 🏆 Top Tracks (last 7 days)
