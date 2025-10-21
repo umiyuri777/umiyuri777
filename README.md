@@ -50,8 +50,8 @@
 ## 🎧 いま聴いてる
 
 <table><tr>
-<td valign="middle"><a href="https://open.spotify.com/track/2qE0FSqfcnA7KHVXGOI4YI"><img src="https://wsrv.nl/?url=https%3A%2F%2Fimage-cdn-fa.spotifycdn.com%2Fimage%2Fab67616d00001e02a767b39823a4dded174cb432&w=220&h=220&fit=cover&mask=ellipse" alt="千年幸福論" width="220" /></a></td>
-<td valign="middle"><div><strong>千年幸福論</strong></div><div><small>amazarashi</small></div><div><a href="https://open.spotify.com/track/2qE0FSqfcnA7KHVXGOI4YI"><img src="https://www.scdn.co/i/_global/favicon.png" alt="Spotify" width="20" /></a></div></td>
+<td valign="middle"><a href="https://open.spotify.com/track/59hVbgr8rfYkDbHfr8RcGI"><img src="https://wsrv.nl/?url=https%3A%2F%2Fimage-cdn-ak.spotifycdn.com%2Fimage%2Fab67616d00001e020256acb207c703b79f16016e&w=220&h=220&fit=cover&mask=ellipse" alt="IRIS OUT" width="220" /></a></td>
+<td valign="middle"><div><strong>IRIS OUT</strong></div><div><small>Kenshi Yonezu</small></div><div><a href="https://open.spotify.com/track/59hVbgr8rfYkDbHfr8RcGI"><img src="https://www.scdn.co/i/_global/favicon.png" alt="Spotify" width="20" /></a></div></td>
 </tr></table>
 
 ## 🏆 Top Tracks (last 7 days)
@@ -60,7 +60,7 @@
 <tr>
 <td valign="top"><div><strong>🥇 1</strong></div><a href="https://open.spotify.com/track/78dMs7M0ETbtyqvJhGchEz"><img src="https://wsrv.nl/?url=https%3A%2F%2Fimage-cdn-fa.spotifycdn.com%2Fimage%2Fab67616d00001e0274107fc94bacad49689da06c&w=220&h=220&fit=cover&mask=ellipse" alt="爆弾の作り方" width="220" /></a><br/><div><strong>夏を待っていました</strong></div><div><small>amazarashi</small></div><div>🔥6</div><div><a href="https://open.spotify.com/track/78dMs7M0ETbtyqvJhGchEz"><img src="https://www.scdn.co/i/_global/favicon.png" alt="Spotify" width="20" /></a></div></td>
 <td valign="top"><div><strong>🥈 2</strong></div><a href="https://open.spotify.com/track/7ipuBrawsJswgLjRJuz20C"><img src="https://wsrv.nl/?url=https%3A%2F%2Fimage-cdn-ak.spotifycdn.com%2Fimage%2Fab67616d00001e0274107fc94bacad49689da06c&w=220&h=220&fit=cover&mask=ellipse" alt="爆弾の作り方" width="220" /></a><br/><div><strong>カルマ</strong></div><div><small>amazarashi</small></div><div>🔥5</div><div><a href="https://open.spotify.com/track/7ipuBrawsJswgLjRJuz20C"><img src="https://www.scdn.co/i/_global/favicon.png" alt="Spotify" width="20" /></a></div></td>
-<td valign="top"><div><strong>🥉 3</strong></div><a href="https://open.spotify.com/track/7IkWojxKrQrdGQtZ6jEcWt"><img src="https://wsrv.nl/?url=https%3A%2F%2Fimage-cdn-ak.spotifycdn.com%2Fimage%2Fab67616d00001e0274107fc94bacad49689da06c&w=220&h=220&fit=cover&mask=ellipse" alt="爆弾の作り方" width="220" /></a><br/><div><strong>無題</strong></div><div><small>amazarashi</small></div><div>🔥5</div><div><a href="https://open.spotify.com/track/7IkWojxKrQrdGQtZ6jEcWt"><img src="https://www.scdn.co/i/_global/favicon.png" alt="Spotify" width="20" /></a></div></td>
+<td valign="top"><div><strong>🥉 3</strong></div><a href="https://open.spotify.com/track/7IkWojxKrQrdGQtZ6jEcWt"><img src="https://wsrv.nl/?url=https%3A%2F%2Fimage-cdn-fa.spotifycdn.com%2Fimage%2Fab67616d00001e0274107fc94bacad49689da06c&w=220&h=220&fit=cover&mask=ellipse" alt="爆弾の作り方" width="220" /></a><br/><div><strong>無題</strong></div><div><small>amazarashi</small></div><div>🔥5</div><div><a href="https://open.spotify.com/track/7IkWojxKrQrdGQtZ6jEcWt"><img src="https://www.scdn.co/i/_global/favicon.png" alt="Spotify" width="20" /></a></div></td>
 </tr>
 </table>
 <!-- SPOTIFY_ACTIVITY_END -->
