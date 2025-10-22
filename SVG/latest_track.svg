@@ -46,11 +46,23 @@
   <circle cx="360" cy="40" r="20" fill="#1db954"/>
   <text x="360" y="47" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle">♪</text>
   
-  <!-- 再生中バー -->
-  <rect x="200" y="110" width="8" height="20" fill="#1db954" rx="4"/>
-  <rect x="215" y="115" width="8" height="10" fill="#1db954" rx="4"/>
-  <rect x="230" y="110" width="8" height="20" fill="#1db954" rx="4"/>
-  <rect x="245" y="118" width="8" height="4" fill="#1db954" rx="2"/>
+  <!-- 再生中バー（アニメーション付き） -->
+  <rect x="200" y="110" width="8" height="20" fill="#1db954" rx="4">
+    <animate attributeName="height" values="20;6;20" dur="1.2s" repeatCount="indefinite"/>
+    <animate attributeName="y" values="110;117;110" dur="1.2s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="215" y="115" width="8" height="10" fill="#1db954" rx="4">
+    <animate attributeName="height" values="10;3;10" dur="1.0s" repeatCount="indefinite"/>
+    <animate attributeName="y" values="115;118;115" dur="1.0s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="230" y="110" width="8" height="20" fill="#1db954" rx="4">
+    <animate attributeName="height" values="20;4;20" dur="1.4s" repeatCount="indefinite"/>
+    <animate attributeName="y" values="110;118;110" dur="1.4s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="245" y="118" width="8" height="4" fill="#1db954" rx="2">
+    <animate attributeName="height" values="4;1;4" dur="0.8s" repeatCount="indefinite"/>
+    <animate attributeName="y" values="118;119;118" dur="0.8s" repeatCount="indefinite"/>
+  </rect>
   
   <!-- リンク（透明なオーバーレイ） -->
   <a xlink:href="https://open.spotify.com/track/0FSMq0hlZMMSbnABEEI7mi" target="_blank">
