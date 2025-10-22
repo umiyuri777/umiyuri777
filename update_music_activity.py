@@ -416,20 +416,20 @@ class SpotifyActivityUpdater:
   
   <!-- 再生中バー（アニメーション付き） -->
   <rect x="200" y="110" width="8" height="20" fill="#1db954" rx="4">
-    <animate attributeName="height" values="20;5;20" dur="1.5s" repeatCount="indefinite"/>
-    <animate attributeName="y" values="110;119;110" dur="2.0s" repeatCount="indefinite"/>
-  </rect>
-  <rect x="215" y="115" width="8" height="20" fill="#1db954" rx="4">
     <animate attributeName="height" values="20;5;20" dur="1.0s" repeatCount="indefinite"/>
-    <animate attributeName="y" values="115;124;115" dur="1.8s" repeatCount="indefinite"/>
+    <animate attributeName="y" values="110;117;110" dur="1.0s" repeatCount="indefinite"/>
   </rect>
-  <rect x="230" y="110" width="8" height="20" fill="#1db954" rx="4">
-    <animate attributeName="height" values="20;5;20" dur="0.8s" repeatCount="indefinite"/>
-    <animate attributeName="y" values="110;119;110" dur="2.2s" repeatCount="indefinite"/>
+  <rect x="215" y="110" width="8" height="5" fill="#1db954" rx="4">
+    <animate attributeName="height" values="5;20;5" dur="1.0s" repeatCount="indefinite"/>
+    <animate attributeName="y" values="117;110;117" dur="1.0s" repeatCount="indefinite"/>
   </rect>
-  <rect x="245" y="110" width="8" height="20" fill="#1db954" rx="4">
-    <animate attributeName="height" values="20;5;20" dur="0.7s" repeatCount="indefinite"/>
-    <animate attributeName="y" values="110;119;110" dur="1.6s" repeatCount="indefinite"/>
+  <rect x="230" y="110" width="8" height="15" fill="#1db954" rx="4">
+    <animate attributeName="height" values="15;5;20;15" dur="1.0s" repeatCount="indefinite"/>
+    <animate attributeName="y" values="110;115;109;110" dur="1.0s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="245" y="105" width="8" height="25" fill="#1db954" rx="4">
+    <animate attributeName="height" values="25;5;25" dur="1.0s" repeatCount="indefinite"/>
+    <animate attributeName="y" values="105;115;105" dur="1.0s" repeatCount="indefinite"/>
   </rect>
   
   <!-- リンク（透明なオーバーレイ） -->
