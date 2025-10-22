@@ -229,7 +229,7 @@ class SpotifyActivityUpdater:
                 album_art_url = self._get_album_art_via_oembed(oembed_target_url)
 
             # 画像はBase64のdata URIで埋め込み（外部参照ブロック対策）
-            image_src = self._image_data_uri(album_art_url, 100)
+            image_src = self._image_data_uri(album_art_url)
 
             # ランキングの色とグラデーション
             gradient_id = f"cardGradient{i}"
@@ -364,7 +364,7 @@ class SpotifyActivityUpdater:
         card_height = 180
         
         # 画像はBase64のdata URIで埋め込み（外部参照ブロック対策）
-        image_src = self._image_data_uri(album_art_url, 140)
+        image_src = self._image_data_uri(album_art_url)
         
         svg_content = f'''<svg width="{card_width}" height="{card_height}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
   <defs>
@@ -452,42 +452,34 @@ class SpotifyActivityUpdater:
             self.logger.error(f"SVGファイルの保存中にエラーが発生しました: {e}")
             return ""
 
-    def _rounded_image_url(self, source_url: str, size: int) -> str:
-        """画像を画像プロキシ(wsrv.nl)経由で角丸(円形)に変換したURLを返す。
-        GitHubのMarkdownではstyleが使えないため、URL側で加工して角丸を実現する。
-        """
-        base = "https://wsrv.nl/?url="
-        if not source_url:
-            encoded = quote("https://placehold.co/300x300?text=No+Art", safe="")
-        else:
-            encoded = quote(source_url, safe="")
-        return f"{base}{encoded}&w={size}&h={size}&fit=cover&mask=ellipse"
 
-    def _image_data_uri(self, source_url: str, size: int) -> str:
-        """画像を取得し、正方形にリサイズした上でBase64のdata URIとして返す。
+    def _image_data_uri(self, source_url: str) -> str:
+        """画像を取得し、Base64のdata URIとして返す。
         - 外部参照がブロックされる環境（READMEやローカルビューア）でも表示できるようにするため。
-        - リサイズにはwsrv.nlを経由して最終画像を取得する。
+        - Spotifyの画像URLを直接使用して最高品質を維持。
+        - リサイズはSVG側で行うため、元画像の品質をそのまま保持。
         失敗時はプレースホルダー画像を使う。
         """
         try:
-            # wsrv.nlでサイズ調整（円形クリップはSVG側で行うためマスク不要）
-            base = "https://wsrv.nl/?url="
             if not source_url:
-                encoded = quote("https://placehold.co/300x300?text=No+Art", safe="")
-            else:
-                encoded = quote(source_url, safe="")
-            url = f"{base}{encoded}&w={size}&h={size}&fit=cover"
-
-            resp = httpx.get(url, timeout=10.0, follow_redirects=True)
-            if resp.status_code != 200 or not resp.content:
-                # フォールバック
+                # プレースホルダー画像を使用
                 fb = httpx.get("https://placehold.co/300x300?text=No+Art", timeout=10.0, follow_redirects=True)
                 fb.raise_for_status()
                 content = fb.content
                 content_type = fb.headers.get("Content-Type", "image/png")
             else:
-                content = resp.content
-                content_type = resp.headers.get("Content-Type", "image/png")
+                # Spotifyの画像URLを直接使用（最高品質）
+                self.logger.debug(f"画像URLを直接使用: {source_url}")
+                resp = httpx.get(source_url, timeout=10.0, follow_redirects=True)
+                if resp.status_code == 200 and resp.content:
+                    content = resp.content
+                    content_type = resp.headers.get("Content-Type", "image/jpeg")
+                else:
+                    # フォールバック
+                    fb = httpx.get("https://placehold.co/300x300?text=No+Art", timeout=10.0, follow_redirects=True)
+                    fb.raise_for_status()
+                    content = fb.content
+                    content_type = fb.headers.get("Content-Type", "image/png")
 
             b64 = base64.b64encode(content).decode("ascii")
             return f"data:{content_type};base64,{b64}"
