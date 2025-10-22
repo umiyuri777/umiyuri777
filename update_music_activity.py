@@ -260,7 +260,8 @@ class SpotifyActivityUpdater:
                 body_parts.append(f'  <!-- トラック情報 {i} -->\n  <text x="{x_pos + 140}" y="80" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">\n    <tspan x="{x_pos + 140}">{track_display}</tspan>\n  </text>\n  \n  <text x="{x_pos + 140}" y="100" font-family="Arial, sans-serif" font-size="12" fill="#b3b3b3">\n    <tspan x="{x_pos + 140}">{artist_display}</tspan>\n  </text>\n  \n  <text x="{x_pos + 140}" y="120" font-family="Arial, sans-serif" font-size="12" fill="#1db954">\n    <tspan x="{x_pos + 140}">🔥 {play_count} plays</tspan>\n  </text>')
 
                 # Spotify ロゴ
-                body_parts.append(f'  <!-- Spotify ロゴ {i} -->\n  <circle cx="{x_pos + card_width_single - 30}" cy="30" r="15" fill="#1db954"/>\n  <text x="{x_pos + card_width_single - 30}" y="37" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white" text-anchor="middle">♪</text>')
+                spotify_logo_data = self._get_spotify_logo_data_uri()
+                body_parts.append(f'  <!-- Spotify ロゴ {i} -->\n  <image xlink:href="{self._xml_attr(spotify_logo_data)}" x="{x_pos + card_width_single - 45}" y="15" width="30" height="30"/>')
 
                 # リンク（透明なオーバーレイ）
                 if spotify_url:
@@ -411,8 +412,7 @@ class SpotifyActivityUpdater:
   </text>
   
   <!-- Spotify ロゴ -->
-  <circle cx="{card_width - 40}" cy="40" r="20" fill="#1db954"/>
-  <text x="{card_width - 40}" y="47" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle">♪</text>
+  <image xlink:href="{self._xml_attr(self._get_spotify_logo_data_uri())}" x="{card_width - 60}" y="20" width="40" height="40"/>
   
   <!-- 再生中バー（アニメーション付き） -->
   <rect x="200" y="110" width="8" height="20" fill="#1db954" rx="4">
@@ -452,6 +452,62 @@ class SpotifyActivityUpdater:
             self.logger.error(f"SVGファイルの保存中にエラーが発生しました: {e}")
             return ""
 
+
+    def _get_spotify_logo_data_uri(self) -> str:
+        """Spotifyの実際のロゴ画像をBase64のdata URIとして返す。
+        複数のソースからSpotifyロゴを取得を試行し、失敗時はSVGフォールバックを使用。
+        """
+        # Spotifyロゴの複数のソース（公式CDNやブランドリソース）
+        logo_urls = [
+            "https://storage.googleapis.com/pr-newsroom-wp/1/2018/11/Spotify_Logo_CMYK_Green.png",
+            "https://developer.spotify.com/assets/branding-guidelines/Spotify_Logo_RGB_Green.png",
+            "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg",
+            "https://www.scdn.co/i/_global/twitter_card.png"
+        ]
+        
+        for url in logo_urls:
+            try:
+                self.logger.debug(f"Spotifyロゴの取得を試行: {url}")
+                response = httpx.get(url, timeout=10.0, follow_redirects=True)
+                
+                if response.status_code == 200 and response.content:
+                    # 画像のContent-Typeを確認
+                    content_type = response.headers.get("Content-Type", "image/png")
+                    
+                    # Base64エンコード
+                    b64 = base64.b64encode(response.content).decode('ascii')
+                    self.logger.info(f"Spotifyロゴを正常に取得しました: {url}")
+                    return f"data:{content_type};base64,{b64}"
+                    
+            except Exception as e:
+                self.logger.debug(f"ロゴ取得失敗 ({url}): {e}")
+                continue
+        
+        # すべてのURLで失敗した場合はSVGフォールバック
+        self.logger.warning("すべてのSpotifyロゴURLで取得に失敗しました。SVGフォールバックを使用します。")
+        return self._get_spotify_logo_svg_fallback()
+    
+    def _get_spotify_logo_svg_fallback(self) -> str:
+        """SpotifyロゴのSVGフォールバック"""
+        spotify_logo_svg = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+            <circle cx="12" cy="12" r="12" fill="#1db954"/>
+            <path d="M17.4 6.6c-3.2-1.9-7.6-2.1-11.2-1.1-.3.1-.4.5-.2.7.1.1.3.2.4.2.1 0 .2 0 .3-.1 3.3-.9 7.3-.7 10.2 1.1.2.1.5.1.7-.1.1-.2.1-.5-.1-.7zm-.3 2.8c-.2.1-.4.2-.6.2-1.8-1.1-4.1-1.4-6.1-.8-.2 0-.4-.1-.5-.3-.1-.2 0-.4.2-.5.1 0 .2-.1.3-.1 2.2-.7 4.8-.4 6.8.9.2.1.3.4.2.6zm-1.4 2.7c-.1.1-.3.1-.4.1-1.5-.9-3.4-1.1-5.1-.6-.2.1-.3-.1-.4-.2-.1-.2 0-.3.1-.4.1-.1.2-.1.3-.1 1.9-.6 4-.3 5.7.7.1.1.2.3.1.5z" fill="white"/>
+        </svg>'''
+        
+        try:
+            svg_bytes = spotify_logo_svg.encode('utf-8')
+            b64 = base64.b64encode(svg_bytes).decode('ascii')
+            return f"data:image/svg+xml;base64,{b64}"
+        except Exception as e:
+            self.logger.error(f"SVGフォールバックの生成中にエラーが発生しました: {e}")
+            # 最終フォールバック: 音符絵文字
+            fallback_svg = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                <circle cx="12" cy="12" r="12" fill="#1db954"/>
+                <text x="12" y="16" font-family="Arial" font-size="12" fill="white" text-anchor="middle">♪</text>
+            </svg>'''
+            svg_bytes = fallback_svg.encode('utf-8')
+            b64 = base64.b64encode(svg_bytes).decode('ascii')
+            return f"data:image/svg+xml;base64,{b64}"
 
     def _image_data_uri(self, source_url: str) -> str:
         """画像を取得し、Base64のdata URIとして返す。
