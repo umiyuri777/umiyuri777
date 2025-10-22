@@ -48,20 +48,20 @@
   
   <!-- 再生中バー（アニメーション付き） -->
   <rect x="200" y="110" width="8" height="20" fill="#1db954" rx="4">
-    <animate attributeName="height" values="20;6;20" dur="1.2s" repeatCount="indefinite"/>
-    <animate attributeName="y" values="110;117;110" dur="1.2s" repeatCount="indefinite"/>
+    <animate attributeName="height" values="20;5;20" dur="1.5s" repeatCount="indefinite"/>
+    <animate attributeName="y" values="110;119;110" dur="2.0s" repeatCount="indefinite"/>
   </rect>
-  <rect x="215" y="115" width="8" height="10" fill="#1db954" rx="4">
-    <animate attributeName="height" values="10;3;10" dur="1.0s" repeatCount="indefinite"/>
-    <animate attributeName="y" values="115;118;115" dur="1.0s" repeatCount="indefinite"/>
+  <rect x="215" y="115" width="8" height="20" fill="#1db954" rx="4">
+    <animate attributeName="height" values="20;5;20" dur="1.0s" repeatCount="indefinite"/>
+    <animate attributeName="y" values="115;124;115" dur="1.8s" repeatCount="indefinite"/>
   </rect>
   <rect x="230" y="110" width="8" height="20" fill="#1db954" rx="4">
-    <animate attributeName="height" values="20;4;20" dur="1.4s" repeatCount="indefinite"/>
-    <animate attributeName="y" values="110;118;110" dur="1.4s" repeatCount="indefinite"/>
+    <animate attributeName="height" values="20;5;20" dur="0.8s" repeatCount="indefinite"/>
+    <animate attributeName="y" values="110;119;110" dur="2.2s" repeatCount="indefinite"/>
   </rect>
-  <rect x="245" y="118" width="8" height="4" fill="#1db954" rx="2">
-    <animate attributeName="height" values="4;1;4" dur="0.8s" repeatCount="indefinite"/>
-    <animate attributeName="y" values="118;119;118" dur="0.8s" repeatCount="indefinite"/>
+  <rect x="245" y="110" width="8" height="20" fill="#1db954" rx="4">
+    <animate attributeName="height" values="20;5;20" dur="0.7s" repeatCount="indefinite"/>
+    <animate attributeName="y" values="110;119;110" dur="1.6s" repeatCount="indefinite"/>
   </rect>
   
   <!-- リンク（透明なオーバーレイ） -->

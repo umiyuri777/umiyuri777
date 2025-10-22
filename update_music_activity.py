@@ -255,7 +255,9 @@ class SpotifyActivityUpdater:
                 )
 
                 # トラック情報
-                body_parts.append(f'  <!-- トラック情報 {i} -->\n  <text x="{x_pos + 140}" y="80" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">\n    <tspan x="{x_pos + 140}">{track_name[:20]}{'...' if len(track_name) > 20 else ''}</tspan>\n  </text>\n  \n  <text x="{x_pos + 140}" y="100" font-family="Arial, sans-serif" font-size="12" fill="#b3b3b3">\n    <tspan x="{x_pos + 140}">{artist_name[:25]}{'...' if len(artist_name) > 25 else ''}</tspan>\n  </text>\n  \n  <text x="{x_pos + 140}" y="120" font-family="Arial, sans-serif" font-size="12" fill="#1db954">\n    <tspan x="{x_pos + 140}">🔥 {play_count} plays</tspan>\n  </text>')
+                track_display = track_name[:20] + ('...' if len(track_name) > 20 else '')
+                artist_display = artist_name[:25] + ('...' if len(artist_name) > 25 else '')
+                body_parts.append(f'  <!-- トラック情報 {i} -->\n  <text x="{x_pos + 140}" y="80" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">\n    <tspan x="{x_pos + 140}">{track_display}</tspan>\n  </text>\n  \n  <text x="{x_pos + 140}" y="100" font-family="Arial, sans-serif" font-size="12" fill="#b3b3b3">\n    <tspan x="{x_pos + 140}">{artist_display}</tspan>\n  </text>\n  \n  <text x="{x_pos + 140}" y="120" font-family="Arial, sans-serif" font-size="12" fill="#1db954">\n    <tspan x="{x_pos + 140}">🔥 {play_count} plays</tspan>\n  </text>')
 
                 # Spotify ロゴ
                 body_parts.append(f'  <!-- Spotify ロゴ {i} -->\n  <circle cx="{x_pos + card_width_single - 30}" cy="30" r="15" fill="#1db954"/>\n  <text x="{x_pos + card_width_single - 30}" y="37" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white" text-anchor="middle">♪</text>')
@@ -414,20 +416,20 @@ class SpotifyActivityUpdater:
   
   <!-- 再生中バー（アニメーション付き） -->
   <rect x="200" y="110" width="8" height="20" fill="#1db954" rx="4">
-    <animate attributeName="height" values="20;6;20" dur="1.2s" repeatCount="indefinite"/>
-    <animate attributeName="y" values="110;117;110" dur="1.2s" repeatCount="indefinite"/>
+    <animate attributeName="height" values="20;5;20" dur="1.5s" repeatCount="indefinite"/>
+    <animate attributeName="y" values="110;119;110" dur="2.0s" repeatCount="indefinite"/>
   </rect>
-  <rect x="215" y="115" width="8" height="10" fill="#1db954" rx="4">
-    <animate attributeName="height" values="10;3;10" dur="1.0s" repeatCount="indefinite"/>
-    <animate attributeName="y" values="115;118;115" dur="1.0s" repeatCount="indefinite"/>
+  <rect x="215" y="115" width="8" height="20" fill="#1db954" rx="4">
+    <animate attributeName="height" values="20;5;20" dur="1.0s" repeatCount="indefinite"/>
+    <animate attributeName="y" values="115;124;115" dur="1.8s" repeatCount="indefinite"/>
   </rect>
   <rect x="230" y="110" width="8" height="20" fill="#1db954" rx="4">
-    <animate attributeName="height" values="20;4;20" dur="1.4s" repeatCount="indefinite"/>
-    <animate attributeName="y" values="110;118;110" dur="1.4s" repeatCount="indefinite"/>
+    <animate attributeName="height" values="20;5;20" dur="0.8s" repeatCount="indefinite"/>
+    <animate attributeName="y" values="110;119;110" dur="2.2s" repeatCount="indefinite"/>
   </rect>
-  <rect x="245" y="118" width="8" height="4" fill="#1db954" rx="2">
-    <animate attributeName="height" values="4;1;4" dur="0.8s" repeatCount="indefinite"/>
-    <animate attributeName="y" values="118;119;118" dur="0.8s" repeatCount="indefinite"/>
+  <rect x="245" y="110" width="8" height="20" fill="#1db954" rx="4">
+    <animate attributeName="height" values="20;5;20" dur="0.7s" repeatCount="indefinite"/>
+    <animate attributeName="y" values="110;119;110" dur="1.6s" repeatCount="indefinite"/>
   </rect>
   
   <!-- リンク（透明なオーバーレイ） -->
