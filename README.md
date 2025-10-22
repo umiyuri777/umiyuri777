@@ -49,18 +49,9 @@
 <!-- SPOTIFY_ACTIVITY_START -->
 ## 🎧 いま聴いてる
 
-<table><tr>
-<td valign="middle"><a href="https://open.spotify.com/track/1FMEnA1EO9kVYP1UqAdejA"><img src="https://wsrv.nl/?url=https%3A%2F%2Fimage-cdn-ak.spotifycdn.com%2Fimage%2Fab67616d00001e02af3559ee1985cc00bc516251&w=220&h=220&fit=cover&mask=ellipse" alt="境界線" width="220" /></a></td>
-<td valign="middle"><div><strong>少年少女</strong></div><div><small>amazarashi</small></div><div><a href="https://open.spotify.com/track/1FMEnA1EO9kVYP1UqAdejA"><img src="https://www.scdn.co/i/_global/favicon.png" alt="Spotify" width="20" /></a></div></td>
-</tr></table>
+![Latest Track](SVG/latest_track.svg)
 
 ## 🏆 Top Tracks (last 7 days)
 
-<table>
-<tr>
-<td valign="top"><div><strong>🥇 1</strong></div><a href="https://open.spotify.com/track/78dMs7M0ETbtyqvJhGchEz"><img src="https://wsrv.nl/?url=https%3A%2F%2Fimage-cdn-ak.spotifycdn.com%2Fimage%2Fab67616d00001e0274107fc94bacad49689da06c&w=220&h=220&fit=cover&mask=ellipse" alt="爆弾の作り方" width="220" /></a><br/><div><strong>夏を待っていました</strong></div><div><small>amazarashi</small></div><div>🔥7</div><div><a href="https://open.spotify.com/track/78dMs7M0ETbtyqvJhGchEz"><img src="https://www.scdn.co/i/_global/favicon.png" alt="Spotify" width="20" /></a></div></td>
-<td valign="top"><div><strong>🥈 2</strong></div><a href="https://open.spotify.com/track/7ipuBrawsJswgLjRJuz20C"><img src="https://wsrv.nl/?url=https%3A%2F%2Fimage-cdn-ak.spotifycdn.com%2Fimage%2Fab67616d00001e0274107fc94bacad49689da06c&w=220&h=220&fit=cover&mask=ellipse" alt="爆弾の作り方" width="220" /></a><br/><div><strong>カルマ</strong></div><div><small>amazarashi</small></div><div>🔥6</div><div><a href="https://open.spotify.com/track/7ipuBrawsJswgLjRJuz20C"><img src="https://www.scdn.co/i/_global/favicon.png" alt="Spotify" width="20" /></a></div></td>
-<td valign="top"><div><strong>🥉 3</strong></div><a href="https://open.spotify.com/track/7IkWojxKrQrdGQtZ6jEcWt"><img src="https://wsrv.nl/?url=https%3A%2F%2Fimage-cdn-ak.spotifycdn.com%2Fimage%2Fab67616d00001e0274107fc94bacad49689da06c&w=220&h=220&fit=cover&mask=ellipse" alt="爆弾の作り方" width="220" /></a><br/><div><strong>無題</strong></div><div><small>amazarashi</small></div><div>🔥6</div><div><a href="https://open.spotify.com/track/7IkWojxKrQrdGQtZ6jEcWt"><img src="https://www.scdn.co/i/_global/favicon.png" alt="Spotify" width="20" /></a></div></td>
-</tr>
-</table>
+![Track Ranking](SVG/track_ranking.svg)
 <!-- SPOTIFY_ACTIVITY_END -->

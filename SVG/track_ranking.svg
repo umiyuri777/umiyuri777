@@ -1,0 +1,129 @@
+<svg width="900" height="200" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <linearGradient id="cardGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#16213e;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cardGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2d1b69;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#11998e;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cardGradient3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B0000;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="shine" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.25" />
+      <stop offset="60%" style="stop-color:#FFFFFF;stop-opacity:0.05" />
+      <stop offset="100%" style="stop-color:#FFFFFF;stop-opacity:0" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+    <clipPath id="artClipRank1">
+      <circle cx="60" cy="100" r="50" />
+    </clipPath>
+    <clipPath id="cardClip1">
+      <rect x="0" y="0" width="286" height="200" rx="12" ry="12" />
+    </clipPath>
+    <clipPath id="artClipRank2">
+      <circle cx="366" cy="100" r="50" />
+    </clipPath>
+    <clipPath id="cardClip2">
+      <rect x="306" y="0" width="286" height="200" rx="12" ry="12" />
+    </clipPath>
+    <clipPath id="artClipRank3">
+      <circle cx="672" cy="100" r="50" />
+    </clipPath>
+    <clipPath id="cardClip3">
+      <rect x="612" y="0" width="286" height="200" rx="12" ry="12" />
+    </clipPath>
+  </defs>
+  <!-- カード 1 背景 -->
+  <rect x="0" y="0" width="286" height="200" rx="12" ry="12" fill="url(#cardGradient1)" filter="url(#shadow)" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
+  <!-- シャイン 1 -->
+  <rect x="-10" y="-10" width="200.2" height="60" fill="url(#shine)" clip-path="url(#cardClip1)"/>
+  <!-- アルバムアートワーク 1 -->
+  <circle cx="60" cy="100" r="50" fill="#333" stroke="#555" stroke-width="2"/>
+  <image xlink:href="data:image/jpeg;base64,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" x="10" y="50" width="100" height="100" clip-path="url(#artClipRank1)"/>
+  <!-- ランキング番号 1 -->
+  <circle cx="22" cy="22" r="14" fill="#FFD700" opacity="0.95" filter="url(#shadow)"/>
+  <text x="22" y="22" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle">1</text>
+  <!-- トラック情報 1 -->
+  <text x="140" y="80" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">
+    <tspan x="140">夏を待っていました</tspan>
+  </text>
+  
+  <text x="140" y="100" font-family="Arial, sans-serif" font-size="12" fill="#b3b3b3">
+    <tspan x="140">amazarashi</tspan>
+  </text>
+  
+  <text x="140" y="120" font-family="Arial, sans-serif" font-size="12" fill="#1db954">
+    <tspan x="140">🔥 7 plays</tspan>
+  </text>
+  <!-- Spotify ロゴ 1 -->
+  <circle cx="256" cy="30" r="15" fill="#1db954"/>
+  <text x="256" y="37" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white" text-anchor="middle">♪</text>
+  <!-- リンク 1 -->
+  <a xlink:href="https://open.spotify.com/track/78dMs7M0ETbtyqvJhGchEz" target="_blank">
+    <rect x="0" y="0" width="286" height="200" fill="transparent"/>
+  </a>
+  <!-- カード 2 背景 -->
+  <rect x="306" y="0" width="286" height="200" rx="12" ry="12" fill="url(#cardGradient2)" filter="url(#shadow)" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
+  <!-- シャイン 2 -->
+  <rect x="296" y="-10" width="200.2" height="60" fill="url(#shine)" clip-path="url(#cardClip2)"/>
+  <!-- アルバムアートワーク 2 -->
+  <circle cx="366" cy="100" r="50" fill="#333" stroke="#555" stroke-width="2"/>
+  <image xlink:href="data:image/jpeg;base64,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" x="316" y="50" width="100" height="100" clip-path="url(#artClipRank2)"/>
+  <!-- ランキング番号 2 -->
+  <circle cx="328" cy="22" r="14" fill="#C0C0C0" opacity="0.95" filter="url(#shadow)"/>
+  <text x="328" y="22" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle">2</text>
+  <!-- トラック情報 2 -->
+  <text x="446" y="80" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">
+    <tspan x="446">カルマ</tspan>
+  </text>
+  
+  <text x="446" y="100" font-family="Arial, sans-serif" font-size="12" fill="#b3b3b3">
+    <tspan x="446">amazarashi</tspan>
+  </text>
+  
+  <text x="446" y="120" font-family="Arial, sans-serif" font-size="12" fill="#1db954">
+    <tspan x="446">🔥 6 plays</tspan>
+  </text>
+  <!-- Spotify ロゴ 2 -->
+  <circle cx="562" cy="30" r="15" fill="#1db954"/>
+  <text x="562" y="37" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white" text-anchor="middle">♪</text>
+  <!-- リンク 2 -->
+  <a xlink:href="https://open.spotify.com/track/7ipuBrawsJswgLjRJuz20C" target="_blank">
+    <rect x="306" y="0" width="286" height="200" fill="transparent"/>
+  </a>
+  <!-- カード 3 背景 -->
+  <rect x="612" y="0" width="286" height="200" rx="12" ry="12" fill="url(#cardGradient3)" filter="url(#shadow)" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
+  <!-- シャイン 3 -->
+  <rect x="602" y="-10" width="200.2" height="60" fill="url(#shine)" clip-path="url(#cardClip3)"/>
+  <!-- アルバムアートワーク 3 -->
+  <circle cx="672" cy="100" r="50" fill="#333" stroke="#555" stroke-width="2"/>
+  <image xlink:href="data:image/jpeg;base64,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" x="622" y="50" width="100" height="100" clip-path="url(#artClipRank3)"/>
+  <!-- ランキング番号 3 -->
+  <circle cx="634" cy="22" r="14" fill="#CD7F32" opacity="0.95" filter="url(#shadow)"/>
+  <text x="634" y="22" dominant-baseline="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle">3</text>
+  <!-- トラック情報 3 -->
+  <text x="752" y="80" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">
+    <tspan x="752">無題</tspan>
+  </text>
+  
+  <text x="752" y="100" font-family="Arial, sans-serif" font-size="12" fill="#b3b3b3">
+    <tspan x="752">amazarashi</tspan>
+  </text>
+  
+  <text x="752" y="120" font-family="Arial, sans-serif" font-size="12" fill="#1db954">
+    <tspan x="752">🔥 6 plays</tspan>
+  </text>
+  <!-- Spotify ロゴ 3 -->
+  <circle cx="868" cy="30" r="15" fill="#1db954"/>
+  <text x="868" y="37" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white" text-anchor="middle">♪</text>
+  <!-- リンク 3 -->
+  <a xlink:href="https://open.spotify.com/track/7IkWojxKrQrdGQtZ6jEcWt" target="_blank">
+    <rect x="612" y="0" width="286" height="200" fill="transparent"/>
+  </a>
+</svg>
