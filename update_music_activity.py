@@ -619,12 +619,63 @@ class SpotifyActivityUpdater:
             self.logger.error(f"external_urlsの処理中にエラーが発生しました: {e}")
             return {}
     
-    def update_readme(self, spotify_content: str):
+    def _generate_spotify_content(self, latest_track: Optional[Dict[str, Any]], ranking: List[Dict[str, Any]]) -> str:
+        """
+        Spotifyコンテンツを生成
+        
+        Args:
+            latest_track: 最新トラックの情報
+            ranking: ランキングの情報
+            
+        Returns:
+            生成されたSpotifyコンテンツ
+        """
+        content_parts = []
+        
+        # 最新トラックセクション
+        content_parts.append("## 🎧 いま聴いてる")
+        content_parts.append("")
+        
+        if latest_track:
+            # 最新トラックのURLを取得
+            external_urls = self._parse_external_urls(latest_track.get('external_urls'))
+            spotify_url = external_urls.get('spotify', '')
+            
+            if spotify_url:
+                content_parts.append(f"[![Latest Track](SVG/latest_track.svg)]({spotify_url})")
+            else:
+                content_parts.append("![Latest Track](SVG/latest_track.svg)")
+        else:
+            content_parts.append("![Latest Track](SVG/latest_track.svg)")
+        
+        content_parts.append("")
+        
+        # ランキングセクション
+        content_parts.append("## 🏆 Top Tracks (last 7 days)")
+        content_parts.append("")
+        
+        if ranking and len(ranking) > 0:
+            # ランキングのURLを取得（最初の楽曲のURLを使用）
+            first_track = ranking[0]
+            external_urls = self._parse_external_urls(first_track.get('external_urls'))
+            spotify_url = external_urls.get('spotify', '')
+            
+            if spotify_url:
+                content_parts.append(f"[![Track Ranking](SVG/track_ranking.svg)]({spotify_url})")
+            else:
+                content_parts.append("![Track Ranking](SVG/track_ranking.svg)")
+        else:
+            content_parts.append("![Track Ranking](SVG/track_ranking.svg)")
+        
+        return "\n".join(content_parts)
+    
+    def update_readme(self, latest_track: Optional[Dict[str, Any]], ranking: List[Dict[str, Any]]):
         """
         README.mdファイルを更新
         
         Args:
-            spotify_content: 追加するSpotifyコンテンツ
+            latest_track: 最新トラックの情報
+            ranking: ランキングの情報
         """
         readme_path = 'README.md'
         
@@ -638,6 +689,9 @@ class SpotifyActivityUpdater:
             # Spotifyセクションの開始と終了マーカー
             start_marker = "<!-- SPOTIFY_ACTIVITY_START -->"
             end_marker = "<!-- SPOTIFY_ACTIVITY_END -->"
+            
+            # Spotifyコンテンツを生成
+            spotify_content = self._generate_spotify_content(latest_track, ranking)
             
             # 既存のSpotifyセクションを検索
             start_pos = content.find(start_marker)
@@ -688,20 +742,12 @@ class SpotifyActivityUpdater:
             latest = self.get_latest_track()
             self.logger.info("最新トラックの取得が完了しました")
 
-            self.logger.info("最新トラックの整形を開始...")
-            latest_content = self.format_latest_track(latest)
-
             self.logger.info("楽曲ランキングの取得を開始...")
             ranking = self.get_track_ranking(limit=3)
             self.logger.info(f"{len(ranking)}曲のランキングを取得しました")
             
-            self.logger.info("ランキングの整形を開始...")
-            ranking_content = self.format_track_ranking(ranking)
-            
-            combined_content = latest_content + "\n\n" + ranking_content
-        
             self.logger.info("README.mdの更新を開始...")
-            self.update_readme(combined_content)
+            self.update_readme(latest, ranking)
             
             self.logger.info("すべての処理が完了しました！")
             
