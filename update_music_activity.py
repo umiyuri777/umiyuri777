@@ -263,7 +263,7 @@ class SpotifyActivityUpdater:
 
                 # Spotify ロゴ
                 spotify_logo_data = self._get_spotify_logo_data_uri()
-                body_parts.append(f'  <!-- Spotify ロゴ {i} -->\n  <image xlink:href="{self._xml_attr(spotify_logo_data)}" x="{x_pos + card_width_single - 55}" y="15" width="50" height="50"/>')
+                body_parts.append(f'  <!-- Spotify ロゴ {i} -->\n  <image xlink:href="{self._xml_attr(spotify_logo_data)}" x="{x_pos + card_width_single - 55}" y="5" width="50" height="50"/>')
 
                 # リンク（透明なオーバーレイ）
                 if spotify_url:
@@ -416,7 +416,7 @@ class SpotifyActivityUpdater:
   </text>
   
   <!-- Spotify ロゴ -->
-  <image xlink:href="{self._xml_attr(self._get_spotify_logo_data_uri())}" x="{card_width - 60}" y="20" width="50" height="50"/>
+  <image xlink:href="{self._xml_attr(self._get_spotify_logo_data_uri())}" x="{card_width - 60}" y="5" width="50" height="50"/>
   
   <!-- 再生中バー（アニメーション付き） -->
   <rect x="200" y="110" width="8" height="20" fill="#1db954" rx="4">
