@@ -682,6 +682,12 @@ class SpotifyActivityUpdater:
         try:
             self.logger.info("README.mdの更新を開始")
             
+            # SVGファイルを生成
+            self.logger.info("SVGファイルの生成を開始...")
+            self.format_latest_track(latest_track)
+            self.format_track_ranking(ranking)
+            self.logger.info("SVGファイルの生成が完了しました")
+            
             # 既存のREADME.mdを読み込み
             with open(readme_path, 'r', encoding='utf-8') as f:
                 content = f.read()
