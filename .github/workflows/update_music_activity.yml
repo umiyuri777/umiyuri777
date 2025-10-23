@@ -35,10 +35,21 @@ jobs:
         run: |
           python update_music_activity.py
 
+      - name: Check generated files
+        run: |
+          echo "Checking if SVG files were generated..."
+          ls -la SVG/
+          if [ -f "SVG/latest_track.svg" ] && [ -f "SVG/track_ranking.svg" ]; then
+            echo "✅ SVG files generated successfully"
+          else
+            echo "❌ SVG files not found"
+            exit 1
+          fi
+
       - name: Commit and push changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add README.md
+          git add README.md SVG/
           git diff --staged --quiet || git commit -m "Update Spotify activity in README"
           git push

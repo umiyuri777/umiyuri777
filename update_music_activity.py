@@ -127,10 +127,11 @@ class SpotifyActivityUpdater:
             }
             svg_card = self._create_ranking_svg_card([placeholder, placeholder, placeholder])
             svg_filename = "track_ranking.svg"
-            svg_path = self._save_svg_file(svg_card, svg_filename)
-            if svg_path:
+            try:
+                svg_path = self._save_svg_file(svg_card, svg_filename)
                 return f"## 🏆 Top Tracks (last 7 days)\n\n![Track Ranking]({svg_path})"
-            else:
+            except Exception as e:
+                self.logger.error(f"プレースホルダーランキングSVGファイルの保存に失敗しました: {e}")
                 return f"## 🏆 Top Tracks (last 7 days)\n\n{svg_card}"
         
         self.logger.info(f"{len(ranking)}曲のランキングをSVGカード形式に整形開始")
@@ -153,11 +154,12 @@ class SpotifyActivityUpdater:
         
         # SVGファイルに保存
         svg_filename = "track_ranking.svg"
-        svg_path = self._save_svg_file(svg_card, svg_filename)
-        
-        if svg_path:
+        try:
+            svg_path = self._save_svg_file(svg_card, svg_filename)
             return f"## 🏆 Top Tracks (last 7 days)\n\n![Track Ranking]({svg_path})"
-        else:
+        except Exception as e:
+            self.logger.error(f"ランキングSVGファイルの保存に失敗しました: {e}")
+            # フォールバック: インラインSVGを使用
             return f"## 🏆 Top Tracks (last 7 days)\n\n{svg_card}"
 
     def _create_ranking_svg_card(self, tracks: List[Dict[str, Any]]) -> str:
@@ -313,10 +315,11 @@ class SpotifyActivityUpdater:
                 spotify_url=''
             )
             svg_filename = "latest_track.svg"
-            svg_path = self._save_svg_file(svg_card, svg_filename)
-            if svg_path:
+            try:
+                svg_path = self._save_svg_file(svg_card, svg_filename)
                 return f"{title}\n\n![Latest Track]({svg_path})"
-            else:
+            except Exception as e:
+                self.logger.error(f"プレースホルダー最新トラックSVGファイルの保存に失敗しました: {e}")
                 return f"{title}\n\n{svg_card}"
 
         track_name_raw = latest_track.get('track_name', 'Unknown Track')
@@ -350,11 +353,12 @@ class SpotifyActivityUpdater:
 
         # SVGファイルに保存
         svg_filename = "latest_track.svg"
-        svg_path = self._save_svg_file(svg_card, svg_filename)
-        
-        if svg_path:
+        try:
+            svg_path = self._save_svg_file(svg_card, svg_filename)
             return f"{title}\n\n![Latest Track]({svg_path})"
-        else:
+        except Exception as e:
+            self.logger.error(f"最新トラックSVGファイルの保存に失敗しました: {e}")
+            # フォールバック: インラインSVGを使用
             return f"{title}\n\n{svg_card}"
 
     def _create_latest_track_svg_card(self, track_name: str, artist_name: str, album_name: str, album_art_url: str, spotify_url: str) -> str:
@@ -444,13 +448,23 @@ class SpotifyActivityUpdater:
         """SVGコンテンツをファイルに保存し、相対パスを返す"""
         filepath = os.path.join(self.svg_dir, filename)
         try:
+            # SVGディレクトリが存在しない場合は作成
+            os.makedirs(self.svg_dir, exist_ok=True)
+            
             with open(filepath, 'w', encoding='utf-8') as f:
                 f.write(svg_content)
             self.logger.info(f"SVGファイルを保存しました: {filepath}")
-            return f"{self.svg_dir}/{filename}"
+            
+            # ファイルが実際に作成されたか確認
+            if os.path.exists(filepath) and os.path.getsize(filepath) > 0:
+                return f"{self.svg_dir}/{filename}"
+            else:
+                self.logger.error(f"SVGファイルの保存に失敗しました: {filepath}")
+                raise Exception(f"SVGファイルの保存に失敗しました: {filepath}")
+                
         except Exception as e:
             self.logger.error(f"SVGファイルの保存中にエラーが発生しました: {e}")
-            return ""
+            raise Exception(f"SVGファイルの保存中にエラーが発生しました: {e}")
 
 
     def _get_spotify_logo_data_uri(self) -> str:
