@@ -24,14 +24,14 @@
 <!-- 3. 好きな技術スタックに変更 -->
 <!-- ライトモート：theme=light, ダークモート：theme=dark -->
 <!-- アイコンの選択肢一覧：https://arc.net/l/quote/zizyykfh -->
-## 🌱 Skills
-### backend
+## 🌱 できること・やったことあること
+### バックエンド
 <img alt="my backend skills" src="https://skillicons.dev/icons?theme=dark&perline=7&i=python,fastapi,go,c,cs" />
 
-### mobile
+### モバイル
 <img alt="my mobile skills" src="https://skillicons.dev/icons?theme=dark&perline=7&i=flutter" />
 
-### others
+### その他いろいろ
 <img alt="my other skills" src="https://skillicons.dev/icons?theme=dark&perline=7&i=unity,postgresql,mysql,supabase,docker,gcp" />
 <br>
 
