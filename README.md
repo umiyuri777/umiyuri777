@@ -38,7 +38,7 @@
 ---
 
 <!-- 4. GitHub usernameを変更, 2箇所 -->
-## 🏃‍♀️ Activities
+## 🏃‍♀️ 最近の活動
 <div align="left"> 
   <img alt="Top Langs" height="150px" src="https://github-readme-stats.vercel.app/api?username=umiyuri777&theme=vue-dark&layout=compact&show_icons=true" />
   <img alt="github stats" height="150px" src="https://github-readme-stats.vercel.app/api/top-langs/?username=umiyuri777&theme=vue-dark&layout=compact" />
@@ -51,7 +51,7 @@
 
 [![Latest Track](SVG/latest_track.svg)](https://open.spotify.com/track/1FMEnA1EO9kVYP1UqAdejA)
 
-## 🏆 Top Tracks (last 7 days)
+## 🏆 今週のトップ3(最新７日間集計)
 
 [![Track Ranking](SVG/track_ranking.svg)](https://open.spotify.com/track/7ipuBrawsJswgLjRJuz20C)
 <!-- SPOTIFY_ACTIVITY_END -->
