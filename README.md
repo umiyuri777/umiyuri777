@@ -49,9 +49,9 @@
 <!-- SPOTIFY_ACTIVITY_START -->
 ## 🎧 いま聴いてる
 
-[![Latest Track](SVG/latest_track.svg)](https://open.spotify.com/track/3yecCDTTXRuTMyQ8syK6HM)
+[![Latest Track](SVG/latest_track.svg)](https://open.spotify.com/track/16rtZ5ECyTTyPrCWPsUNoP)
 
 ## 🏆 Top Tracks (last 7 days)
 
-[![Track Ranking](SVG/track_ranking.svg)](https://open.spotify.com/track/7p0aSAII7ocfxUGUrASpLs)
+[![Track Ranking](SVG/track_ranking.svg)](https://open.spotify.com/track/78dMs7M0ETbtyqvJhGchEz)
 <!-- SPOTIFY_ACTIVITY_END -->
