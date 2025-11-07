@@ -9,7 +9,7 @@
 - 🧑‍💻 バックエンドが好きです
 - 🌱 最近はGoとかアーキテクチャに興味があります  
 <div>
-  <a href="https://x.com/wotagei_umiyuri">
+  <a href="https://x.com/umiyuri777">
     <img src="https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/x.svg" alt="X" width="22" />
   </a>
   &nbsp;
