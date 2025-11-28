@@ -53,5 +53,5 @@
 
 ## 🏆 Top Tracks (last 7 days)
 
-[![Track Ranking](SVG/track_ranking.svg)](https://open.spotify.com/track/0QtZaVuKKFBqt8z3atTjBr)
+[![Track Ranking](SVG/track_ranking.svg)](https://open.spotify.com/track/0FSMq0hlZMMSbnABEEI7mi)
 <!-- SPOTIFY_ACTIVITY_END -->
