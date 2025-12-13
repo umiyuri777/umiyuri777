@@ -1,40 +1,135 @@
 #!/usr/bin/env python3
 """
-SupabaseからSpotifyログを取得してREADME.mdを更新するスクリプト
+Spotify Web APIからアクティビティ情報を取得してREADME.mdを更新するスクリプト
 """
 
 import os
 import json
 import logging
-from datetime import datetime, timedelta
-from supabase import create_client, Client
 from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
 import httpx
 import base64
 from html import escape
-from urllib.parse import quote
 
 class SpotifyActivityUpdater:
     def __init__(self):
-        """Supabaseクライアントを初期化"""
+        """Spotify Web APIクライアントを初期化"""
         # ログ設定
         logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
         self.logger = logging.getLogger(__name__)
         
-        self.supabase_url = os.getenv('SUPABASE_URL')
-        self.supabase_key = os.getenv('SUPABASE_KEY')
+        # Spotify API認証情報
+        self.client_id = os.getenv('SPOTIFY_CLIENT_ID')
+        self.client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
+        self.refresh_token = os.getenv('SPOTIFY_REFRESH_TOKEN')
         
-        if not self.supabase_url or not self.supabase_key:
-            raise ValueError("SUPABASE_URL と SUPABASE_KEY の環境変数が設定されていません")
+        if not self.client_id or not self.client_secret or not self.refresh_token:
+            raise ValueError("SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REFRESH_TOKEN の環境変数が設定されていません")
         
-        self.supabase: Client = create_client(self.supabase_url, self.supabase_key)
-        self.logger.info("Supabaseクライアントが初期化されました")
+        self.api_base_url = "https://api.spotify.com/v1"
+        self.auth_base_url = "https://accounts.spotify.com"
+        self.access_token: Optional[str] = None
         
         # SVGディレクトリの作成
         self.svg_dir = "SVG"
         os.makedirs(self.svg_dir, exist_ok=True)
         self.logger.info(f"SVGディレクトリを確認/作成しました: {self.svg_dir}")
+        
+        # アクセストークンを取得
+        self._refresh_access_token()
+    
+    def _refresh_access_token(self) -> None:
+        """Refresh Tokenを使用してアクセストークンを取得・更新"""
+        try:
+            auth_url = f"{self.auth_base_url}/api/token"
+            auth_header = base64.b64encode(
+                f"{self.client_id}:{self.client_secret}".encode('utf-8')
+            ).decode('utf-8')
+            
+            data = {
+                'grant_type': 'refresh_token',
+                'refresh_token': self.refresh_token
+            }
+            
+            headers = {
+                'Authorization': f'Basic {auth_header}',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+            
+            response = httpx.post(auth_url, data=data, headers=headers, timeout=10.0)
+            response.raise_for_status()
+            
+            token_data = response.json()
+            self.access_token = token_data.get('access_token')
+            
+            # 新しいrefresh_tokenが返された場合は更新
+            if 'refresh_token' in token_data:
+                self.refresh_token = token_data['refresh_token']
+            
+            self.logger.info("アクセストークンを正常に取得しました")
+            
+        except Exception as e:
+            self.logger.error(f"アクセストークンの取得中にエラーが発生しました: {e}")
+            raise ValueError(f"Spotify API認証に失敗しました: {e}")
+    
+    def _api_request(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Spotify APIへのリクエストを実行"""
+        if not self.access_token:
+            self._refresh_access_token()
+        
+        url = f"{self.api_base_url}{endpoint}"
+        headers = {
+            'Authorization': f'Bearer {self.access_token}',
+            'Content-Type': 'application/json'
+        }
+        
+        try:
+            response = httpx.get(url, headers=headers, params=params, timeout=10.0)
+            
+            # 401エラーの場合はトークンを再取得してリトライ
+            if response.status_code == 401:
+                self.logger.warning("アクセストークンが無効です。再取得します。")
+                self._refresh_access_token()
+                headers['Authorization'] = f'Bearer {self.access_token}'
+                response = httpx.get(url, headers=headers, params=params, timeout=10.0)
+            
+            response.raise_for_status()
+            return response.json()
+            
+        except httpx.HTTPStatusError as e:
+            error_message = e.response.text
+            status_code = e.response.status_code
+            
+            # 403エラーの場合、スコープ不足の可能性を明確に示す
+            if status_code == 403:
+                try:
+                    error_data = e.response.json()
+                    if 'error' in error_data and 'message' in error_data['error']:
+                        error_msg = error_data['error']['message']
+                        if 'scope' in error_msg.lower() or 'Insufficient client scope' in error_msg:
+                            self.logger.error("=" * 60)
+                            self.logger.error("❌ スコープ不足エラーが発生しました")
+                            self.logger.error("=" * 60)
+                            self.logger.error("現在のRefresh Tokenに必要なスコープが含まれていません。")
+                            self.logger.error("")
+                            self.logger.error("必要なスコープ:")
+                            self.logger.error("  - user-read-recently-played (最近再生したトラックを取得)")
+                            self.logger.error("  - user-top-read (トップトラックを取得)")
+                            self.logger.error("")
+                            self.logger.error("解決方法:")
+                            self.logger.error("  1. get_spotify_token.py を実行して新しいRefresh Tokenを取得")
+                            self.logger.error("  2. または、SPOTIFY_SETUP.md の手順に従ってRefresh Tokenを再取得")
+                            self.logger.error("  3. .envファイルまたはGitHub SecretsのSPOTIFY_REFRESH_TOKENを更新")
+                            self.logger.error("=" * 60)
+                except:
+                    pass
+            
+            self.logger.error(f"Spotify APIリクエストエラー: {status_code} - {error_message}")
+            raise
+        except Exception as e:
+            self.logger.error(f"Spotify APIリクエスト中にエラーが発生しました: {e}")
+            raise
     
     def _xml_attr(self, value: str) -> str:
         """SVG/XMLの属性用に最低限のエスケープを行う。
@@ -50,49 +145,53 @@ class SpotifyActivityUpdater:
             .replace('"', '&quot;')
         )
 
-    def get_track_ranking(self, days: int = 7, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_track_ranking(self, limit: int = 50) -> List[Dict[str, Any]]:
         """
-        指定された日数分の楽曲ランキングを取得
+        Spotify Web APIから直近一ヶ月（short_term）のトップトラックランキングを取得
         
         Args:
-            days: 取得する日数（デフォルト: 7日）
-            limit: 取得する楽曲数（デフォルト: 10曲）
+            limit: 取得する楽曲数（デフォルト: 50曲、最大50曲）
             
         Returns:
             楽曲ランキングのリスト
         """
         try:
-            # 過去N日間のデータを取得
-            start_date = datetime.now() - timedelta(days=days)
-            self.logger.info(f"過去{days}日間の楽曲ランキングを取得開始 (開始日: {start_date.isoformat()})")
+            self.logger.info(f"Spotify Web APIからトップトラックランキングを取得開始（short_term期間、最大{limit}曲）")
             
-            # Supabaseからランキングデータを取得
-            response = self.supabase.table('spotify_logs').select(
-                'track_name, artist_name, album_name, track_id, album_id, external_urls, popularity'
-            ).gte(
-                'played_at', start_date.isoformat()
-            ).execute()
+            # Spotify APIからトップトラックを取得（short_term = 直近一ヶ月）
+            params = {
+                'time_range': 'short_term',  # short_term, medium_term, long_term
+                'limit': min(limit, 50)  # APIの最大値は50
+            }
             
-            if hasattr(response, 'data') and response.data:
-                # 楽曲ごとに再生回数を集計
-                track_counts = {}
-                for log in response.data:
-                    track_key = f"{log.get('track_name', '')}|{log.get('artist_name', '')}"
-                    if track_key not in track_counts:
-                        track_counts[track_key] = {
-                            'track_name': log.get('track_name', ''),
-                            'artist_name': log.get('artist_name', ''),
-                            'album_name': log.get('album_name', ''),
-                            'track_id': log.get('track_id', ''),
-                            'album_id': log.get('album_id', ''),
-                            'external_urls': log.get('external_urls', {}),
-                            'popularity': log.get('popularity', 0),
-                            'play_count': 0
-                        }
-                    track_counts[track_key]['play_count'] += 1
-                
-                # 再生回数でソートして上位を取得
-                ranking = sorted(track_counts.values(), key=lambda x: x['play_count'], reverse=True)[:limit]
+            response_data = self._api_request('/me/top/tracks', params=params)
+            
+            if 'items' in response_data and response_data['items']:
+                ranking = []
+                for track in response_data['items']:
+                    # アーティスト名を結合（複数アーティストの場合）
+                    artists = track.get('artists', [])
+                    artist_names = ', '.join([artist.get('name', '') for artist in artists])
+                    
+                    # アルバム情報を取得
+                    album = track.get('album', {})
+                    album_name = album.get('name', '')
+                    album_id = album.get('id', '')
+                    
+                    # 外部URLを取得
+                    external_urls = track.get('external_urls', {})
+                    
+                    track_data = {
+                        'track_name': track.get('name', ''),
+                        'artist_name': artist_names,
+                        'album_name': album_name,
+                        'track_id': track.get('id', ''),
+                        'album_id': album_id,
+                        'external_urls': external_urls,
+                        'popularity': track.get('popularity', 0),
+                        'play_count': 0  # APIからは再生回数は取得できないため0
+                    }
+                    ranking.append(track_data)
                 
                 self.logger.info(f"{len(ranking)}曲のランキングを取得しました")
                 return ranking
@@ -107,6 +206,7 @@ class SpotifyActivityUpdater:
     def format_track_ranking(self, ranking: List[Dict[str, Any]]) -> str:
         """
         楽曲ランキングをSVGカード形式に整形（上位3位固定）
+        Spotify Web APIのshort_term期間のトップトラックを表示
         
         Args:
             ranking: 楽曲ランキングのリスト
@@ -129,10 +229,10 @@ class SpotifyActivityUpdater:
             svg_filename = "track_ranking.svg"
             try:
                 svg_path = self._save_svg_file(svg_card, svg_filename)
-                return f"## 🏆 Top Tracks (last 7 days)\n\n![Track Ranking]({svg_path})"
+                return f"## 🏆 Top Tracks (last 1 month)\n\n![Track Ranking]({svg_path})"
             except Exception as e:
                 self.logger.error(f"プレースホルダーランキングSVGファイルの保存に失敗しました: {e}")
-                return f"## 🏆 Top Tracks (last 7 days)\n\n{svg_card}"
+                return f"## 🏆 Top Tracks (last 1 month)\n\n{svg_card}"
         
         self.logger.info(f"{len(ranking)}曲のランキングをSVGカード形式に整形開始")
         
@@ -156,11 +256,11 @@ class SpotifyActivityUpdater:
         svg_filename = "track_ranking.svg"
         try:
             svg_path = self._save_svg_file(svg_card, svg_filename)
-            return f"## 🏆 Top Tracks (last 7 days)\n\n![Track Ranking]({svg_path})"
+            return f"## 🏆 Top Tracks (last 1 month)\n\n![Track Ranking]({svg_path})"
         except Exception as e:
             self.logger.error(f"ランキングSVGファイルの保存に失敗しました: {e}")
             # フォールバック: インラインSVGを使用
-            return f"## 🏆 Top Tracks (last 7 days)\n\n{svg_card}"
+            return f"## 🏆 Top Tracks (last 1 month)\n\n{svg_card}"
 
     def _create_ranking_svg_card(self, tracks: List[Dict[str, Any]]) -> str:
         """ランキング用のSVGカードを生成"""
@@ -259,7 +359,9 @@ class SpotifyActivityUpdater:
                 # トラック情報
                 track_display = track_name[:20] + ('...' if len(track_name) > 20 else '')
                 artist_display = artist_name[:25] + ('...' if len(artist_name) > 25 else '')
-                body_parts.append(f'  <!-- トラック情報 {i} -->\n  <text x="{x_pos + 140}" y="80" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">\n    <tspan x="{x_pos + 140}">{track_display}</tspan>\n  </text>\n  \n  <text x="{x_pos + 140}" y="100" font-family="Arial, sans-serif" font-size="12" fill="#b3b3b3">\n    <tspan x="{x_pos + 140}">{artist_display}</tspan>\n  </text>\n  \n  <text x="{x_pos + 140}" y="120" font-family="Arial, sans-serif" font-size="12" fill="#1db954">\n    <tspan x="{x_pos + 140}">🔥 {play_count} plays</tspan>\n  </text>')
+                # play_countが0の場合は表示しない（APIからは再生回数が取得できないため）
+                play_count_text = f'🔥 {play_count} plays' if play_count > 0 else '⭐ Top Track'
+                body_parts.append(f'  <!-- トラック情報 {i} -->\n  <text x="{x_pos + 140}" y="80" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffffff">\n    <tspan x="{x_pos + 140}">{track_display}</tspan>\n  </text>\n  \n  <text x="{x_pos + 140}" y="100" font-family="Arial, sans-serif" font-size="12" fill="#b3b3b3">\n    <tspan x="{x_pos + 140}">{artist_display}</tspan>\n  </text>\n  \n  <text x="{x_pos + 140}" y="120" font-family="Arial, sans-serif" font-size="12" fill="#1db954">\n    <tspan x="{x_pos + 140}">{play_count_text}</tspan>\n  </text>')
 
                 # Spotify ロゴ
                 spotify_logo_data = self._get_spotify_logo_data_uri()
@@ -280,24 +382,60 @@ class SpotifyActivityUpdater:
         return "\n".join(svg_parts)
 
     def get_latest_track(self) -> Optional[Dict[str, Any]]:
-        """直近で再生した最新トラックを1件取得して返す。
+        """Spotify Web APIから直近で再生した最新トラックを1件取得して返す。
         取得に失敗した場合は None を返す。
         """
         try:
-            response = (
-                self.supabase
-                .table('spotify_logs')
-                .select('track_name, artist_name, album_name, track_id, album_id, external_urls, popularity, played_at')
-                .order('played_at', desc=True)
-                .limit(1)
-                .execute()
-            )
-
-            if hasattr(response, 'data') and response.data:
-                return response.data[0]
+            self.logger.info("Spotify Web APIから最新トラックを取得開始")
+            
+            # 最近再生したトラックを取得（最新1件）
+            params = {
+                'limit': 1
+            }
+            
+            response_data = self._api_request('/me/player/recently-played', params=params)
+            
+            if 'items' in response_data and response_data['items']:
+                # 最新のトラックを取得
+                latest_item = response_data['items'][0]
+                track = latest_item.get('track', {})
+                
+                # アーティスト名を結合（複数アーティストの場合）
+                artists = track.get('artists', [])
+                artist_names = ', '.join([artist.get('name', '') for artist in artists])
+                
+                # アルバム情報を取得
+                album = track.get('album', {})
+                album_name = album.get('name', '')
+                album_id = album.get('id', '')
+                
+                # 外部URLを取得
+                external_urls = track.get('external_urls', {})
+                
+                track_data = {
+                    'track_name': track.get('name', ''),
+                    'artist_name': artist_names,
+                    'album_name': album_name,
+                    'track_id': track.get('id', ''),
+                    'album_id': album_id,
+                    'external_urls': external_urls,
+                    'popularity': track.get('popularity', 0),
+                    'played_at': latest_item.get('played_at', '')
+                }
+                
+                self.logger.info(f"最新トラックを取得しました: {track_data.get('track_name')} - {track_data.get('artist_name')}")
+                return track_data
             else:
                 self.logger.info("最新トラックが見つかりませんでした")
                 return None
+                
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 204:
+                # 204 No Content = 現在再生中のトラックがない
+                self.logger.info("現在再生中のトラックがありません")
+                return None
+            self.logger.error(f"最新トラック取得中にHTTPエラーが発生しました: {e}")
+            return None
         except Exception as e:
             self.logger.error(f"最新トラック取得中にエラーが発生しました: {e}")
             return None
@@ -665,7 +803,7 @@ class SpotifyActivityUpdater:
         content_parts.append("")
         
         # ランキングセクション
-        content_parts.append("## 🏆 Top Tracks (last 7 days)")
+        content_parts.append("## 🏆 Top Tracks (last 1 month)")
         content_parts.append("")
         
         if ranking and len(ranking) > 0:
@@ -764,7 +902,7 @@ class SpotifyActivityUpdater:
 
             self.logger.info("楽曲ランキングの取得を開始...")
             ranking = self.get_track_ranking(limit=3)
-            self.logger.info(f"{len(ranking)}曲のランキングを取得しました")
+            self.logger.info(f"{len(ranking)}曲のランキングを取得しました（short_term期間）")
             
             self.logger.info("README.mdの更新を開始...")
             self.update_readme(latest, ranking)
