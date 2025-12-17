@@ -35,7 +35,7 @@
   
   <!-- トラック情報 -->
   <text x="200" y="60" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#ffffff">
-    <tspan x="200">アンアライブ</tspan>
+    <tspan x="200">小市民イーア</tspan>
   </text>
   
   <text x="200" y="90" font-family="Arial, sans-serif" font-size="14" fill="#b3b3b3">
@@ -64,7 +64,7 @@
   </rect>
   
   <!-- リンク（透明なオーバーレイ） -->
-  <a xlink:href="https://open.spotify.com/track/7oAQ5gruw14mTG1PThlIph" target="_blank">
+  <a xlink:href="https://open.spotify.com/track/6rPUD1i6oZl8IGt7w5EgNI" target="_blank">
     <rect x="0" y="0" width="400" height="180" fill="transparent"/>
   </a>
 </svg>
