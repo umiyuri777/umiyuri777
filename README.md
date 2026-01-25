@@ -49,7 +49,7 @@
 <!-- SPOTIFY_ACTIVITY_START -->
 ## 🎧 いま聴いてる
 
-[![Latest Track](SVG/latest_track.svg)](https://open.spotify.com/track/354lV5CbhIEHqCzM3EIUN3)
+[![Latest Track](SVG/latest_track.svg)](https://open.spotify.com/track/5Rf7s2VU21PwHl2HjxXbYP)
 
 ## 🏆 Top Tracks (last 1 month)
 
