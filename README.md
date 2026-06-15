@@ -53,5 +53,5 @@
 
 ## 🏆 Top Tracks (last 1 month)
 
-[![Track Ranking](SVG/track_ranking.svg)](https://open.spotify.com/track/3Pn8IhJ6tulPS4cmGEGZBs)
+[![Track Ranking](SVG/track_ranking.svg)](https://open.spotify.com/track/5Ij88F5dK7yib1RoNA8wGV)
 <!-- SPOTIFY_ACTIVITY_END -->
